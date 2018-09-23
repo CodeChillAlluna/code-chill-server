@@ -10,9 +10,9 @@ before_script:
   - sudo sh install/docker.sh
 
 script:
-  - mvn clean package
+  - sudo mvn clean package
 after_success:
-  - mvn clean test -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report
+  - sudo mvn clean test -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report
         
 notifications:
   email: false
