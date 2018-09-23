@@ -15,9 +15,7 @@ before_script:
   - sudo sh install/docker.sh
 
 script:
-  - ./mvnw clean package
-after_success:
-  - ./mvnw clean test -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report
+  - ./mvnw clean package -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report
         
 notifications:
   email: false
