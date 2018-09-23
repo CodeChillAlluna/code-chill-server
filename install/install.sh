@@ -47,7 +47,7 @@ sudo apt-get install -y postgresql
 sudo apt-get install -y postgresql-contrib
 
 # Configuration de la BDD postgresql
-sudo sh $vagrant/install/db.sh
+# sudo sh $vagrant/install/db.sh
 
 # Install nginx
 sudo apt-get install nginx
@@ -94,6 +94,6 @@ WantedBy=multi-user.target" > /lib/systemd/system/docker.service
 systemctl daemon-reload
 systemctl restart docker
 
-sudo sh $vagrant/install/docker.sh
+# sudo sh $vagrant/install/docker.sh
 
 print_help
