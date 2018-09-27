@@ -11,8 +11,8 @@ services:
   - docker
   - postgresql
 before_script:
-  - sudo sh install/db.sh
-  - sudo sh install/docker.sh
+  - sudo sh install/install.sh 0
+  - sudo sh install/install.sh 2
 
 script:
   - ./mvnw clean package -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report
