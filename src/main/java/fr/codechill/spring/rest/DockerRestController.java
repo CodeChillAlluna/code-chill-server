@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import org.apache.log4j.Logger;
+
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
 @RestController
 public class DockerRestController {
+    private static final Logger logger = Logger.getLogger(UserController.class);
     private final String BASE_URL = "http://localhost:2375";
 
     @PostMapping(value = "/containers/{id}/start", produces = "application/json")
@@ -29,7 +32,9 @@ public class DockerRestController {
         HttpEntity<Object> entity = new HttpEntity<Object>(headers);
         restTemplate.exchange(dockerStartUrl, HttpMethod.POST, entity, String.class);
         ObjectNode data = mapper.createObjectNode();
+        logger.info("docker with the ID : " + id + "starting");
         data.put("data", "Docker started");
+        logger.info("docker with the ID : " + id + "started");
         return ResponseEntity.ok().headers(headers).body(data);
     }
 
@@ -42,7 +47,9 @@ public class DockerRestController {
         HttpEntity<Object> entity = new HttpEntity<Object>(headers);
         restTemplate.exchange(dockerStoptUrl, HttpMethod.POST, entity, String.class);
         ObjectNode data = mapper.createObjectNode();
+        logger.info("Stopping docker with the ID : " + id);
         data.put("data", "Docker stoped");
+        logger.info("docker with the ID : " + id + "stopped");
         return ResponseEntity.ok().headers(headers).body(data);
     }
 

@@ -1,5 +1,6 @@
 package fr.codechill.spring.rest;
 
+import org.apache.log4j.Logger;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,6 +39,7 @@ public class UserController {
     private final DockerController dcontroller;
     private final String SENDFROM = "codechill@hotmail.com";
     private final String BASE_URL = "http://localhost:3000";
+    private static final Logger logger = Logger.getLogger(UserController.class);
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -56,6 +58,7 @@ public class UserController {
     @GetMapping("/user/{id}")
     public User getUser(@PathVariable("id") Long id) {
         User user = this.urepo.findOne(id);
+        logger.info("getting user informations");
         return user;
     }
 
@@ -65,6 +68,7 @@ public class UserController {
         String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
         User user = this.urepo.findByUsername(username);
         this.urepo.delete(user);
+        logger.info("the user"+ user.getLastname()+"has been deleted");
         return ResponseEntity.ok().headers(new HttpHeaders()).body(null);
     }
 
@@ -74,16 +78,19 @@ public class UserController {
         String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
         User updatedUser = this.urepo.findByUsername(username);
         if (!updatedUser.getLastname().equals(user.getLastname())) {
+            logger.info("updating user lastname with : "+updatedUser.getLastname());
             updatedUser.setLastname(user.getLastname());
         }
         if (!updatedUser.getFirstname().equals(user.getFirstname())) {
+            logger.info("updating user lastname with : "+updatedUser.getFirstname());
             updatedUser.setFirstname(user.getFirstname());
+            
         }
         if (!updatedUser.getEmail().equals(user.getEmail())) {
             updatedUser.setEmail(user.getEmail());
-            updateUserEmail(updatedUser.getEmail());
+            logger.info("updating user email with : "+ updatedUser.getEmail());
+            updateUserEmail(updatedUser.getEmail());         
         }
-
         this.urepo.save(updatedUser);
         return user;
     }
@@ -92,9 +99,11 @@ public class UserController {
     public ResponseEntity<?> addUser(@RequestBody User user) throws BadRequestException {
         HttpHeaders responseHeaders = new HttpHeaders();
         if (urepo.findByUsername(user.getUsername()) != null) {
+            logger.info("An account with this username already exist ");
             throw new BadRequestException("An account with this username already exist!");
         }
         if (urepo.findByEmail(user.getEmail()) != null) {
+            logger.info("An account with this email already exist!");
             throw new BadRequestException("An account with this email already exist!");
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
@@ -114,13 +123,16 @@ public class UserController {
         if(!"".equals(email))
         {
             SimpleMailMessage updateEmail = new SimpleMailMessage();
+            logger.info("Updating the user email with : "+email);
             updateEmail.setFrom(SENDFROM);
             updateEmail.setTo(email);
-            updateEmail.setSubject("Email adresse change");
+            logger.info("email content : "+ updateEmail);
+            updateEmail.setSubject("Email adresse changed");
             updateEmail.setText("Your new email adress has been saved by our services");
             mailSender.send(updateEmail);
             return true;
         }
+        logger.info("user email update failed due to an empty value");
         return false;
     }
     //Method sending an error message for the former email adress
@@ -132,11 +144,10 @@ public class UserController {
             infoUpdateFail.setTo(user.getEmail());
             infoUpdateFail.setSubject("Suspicious access to your account");
             infoUpdateFail.setText("We have registered a suspicious activity on your acccount");
-
+            logger.info("email content : "+ infoUpdateFail);
             mailSender.send(infoUpdateFail);
             return true;
         }
-
         return false;
     }
 
@@ -160,7 +171,8 @@ public class UserController {
             mailSender.send(passwordResetEmail);
             return ResponseEntity.ok().headers(responseHeaders).body(user);
         }
-        throw new BadRequestException("No user found with this email");
+        logger.info("No user email was found with this email");
+        throw new BadRequestException("No user found with this email");  
     }
 
     @GetMapping(value = "/reset/{token}")
@@ -175,6 +187,7 @@ public class UserController {
         if(user != null && currentDate.after(user.getLastPasswordResetDate()) && currentDate.before(currentDatePlusOne)) {
             return ResponseEntity.ok().headers(responseHeaders).body(user);
         }
+        logger.info("Password reset failed due to an invalid token or an out dated one");
         throw new BadRequestException("Your token is invalid or hax expired");
     }
 
@@ -189,6 +202,7 @@ public class UserController {
             urepo.save(user);
             return ResponseEntity.ok().headers(responseHeaders).body(user);
         }
+        logger.info("Setting of a new password due to an invalid token or an out dated one");
         throw new BadRequestException("Your token is invalid or hax expired");
     }
 }

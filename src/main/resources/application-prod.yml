@@ -1,0 +1,55 @@
+# config context path to "/" by setting an empty string
+server:
+  contextPath:
+
+
+spring:
+  #Spring profile
+  profiles: "prod"
+  # JACKSON
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+  mail:
+    host: 
+    port: 587
+    username: ""
+    password: ""
+    smtp:
+      protocol: smtp
+      debug: true
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+
+  datasource:
+    url: jdbc:postgresql://localhost/codechill
+    username: code
+    password: chill
+
+  jpa:
+    generate:
+      ddl: true
+    hibernate:
+      ddl-auto: create
+
+jwt:
+  header: Authorization
+  secret: mySecret
+  expiration: 604800
+  route:
+    authentication:
+      path: auth
+      refresh: refresh
+
+logging:
+  file: /var/log/application-prod-debug.log
+  pattern:
+    file: "%d %-5level [%thread] %logger : %msg%n"
+  level:
+    ROOT: ERROR
+
+#logging:
+#  level:
+#    org.springframework:
+#      security: DEBUG
