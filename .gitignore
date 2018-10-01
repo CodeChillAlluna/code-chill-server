@@ -575,3 +575,6 @@ ASALocalRun/
 
 
 # End of https://www.gitignore.io/api/java,maven,eclipse,java-web,sublimetext,intellij+all,visualstudio,visualstudiocode,vagrant
+
+#Ignore the application-dev
+src/main/resources/application-dev.yml
