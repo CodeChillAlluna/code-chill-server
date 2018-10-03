@@ -15,12 +15,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
 @RestController
 public class DockerRestController {
-    private static final Logger logger = Logger.getLogger(UserController.class);
+    private final Log logger =  LogFactory.getLog(this.getClass());
     private final String BASE_URL = "http://localhost:2375";
 
     @PostMapping(value = "/containers/{id}/start", produces = "application/json")

@@ -1,6 +1,8 @@
 package fr.codechill.spring.rest;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,7 +41,7 @@ public class UserController {
     private final DockerController dcontroller;
     private final String SENDFROM = "codechill@hotmail.com";
     private final String BASE_URL = "http://localhost:3000";
-    private static final Logger logger = Logger.getLogger(UserController.class);
+    private final Log logger = LogFactory.getLog(this.getClass());;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
