@@ -235,6 +235,7 @@ GitHub.sublime-settings
 *.box
 
 ### VisualStudioCode ###
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -578,3 +579,4 @@ ASALocalRun/
 
 #Ignore the application-dev
 src/main/resources/application-dev.yml
+testtoken.txt

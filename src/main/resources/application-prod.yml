@@ -13,8 +13,8 @@ spring:
   mail:
     host: 
     port: 587
-    username: ""
-    password: ""
+    username: "CHANGEME"
+    password: "CHANGEME"
     smtp:
       protocol: smtp
       debug: true
@@ -31,7 +31,7 @@ spring:
     generate:
       ddl: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
 jwt:
   header: Authorization
@@ -43,11 +43,15 @@ jwt:
       refresh: refresh
 
 logging:
-  file: /var/log/application-prod-debug.log
+  file: /var/log/codechill-server.log
   pattern:
     file: "%d %-5level [%thread] %logger : %msg%n"
   level:
     ROOT: ERROR
+
+app:
+  dockerurl: CHANGEME
+  clienturl: CHANGEME
 
 #logging:
 #  level:

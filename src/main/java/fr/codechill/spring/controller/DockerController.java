@@ -1,31 +1,43 @@
 package fr.codechill.spring.controller;
 
 import java.io.IOException;
+import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.MediaType;
 
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.repository.DockerRepository;
 
+@Component
 public class DockerController {
 
     private final DockerRepository drepo;
-    private final String BASE_URL = "http://localhost:2375";
+
+    @Value("${app.dockerurl}")
+    private String BASE_URL;
+
+    private static final Logger logger = Logger.getLogger(DockerController.class);
 
     public DockerController(DockerRepository drepo) {
         this.drepo = drepo;
     }
 
     public Docker createDocker() {
+        System.out.println("DOCKER URL");
+        System.out.println(this.BASE_URL);
+        logger.info("DOCKER URL");
+        logger.info(this.BASE_URL);
         String dockerCreatetUrl = BASE_URL + "/containers/create";
         RestTemplate restTemplate = new RestTemplate();
 

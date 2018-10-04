@@ -10,15 +10,15 @@ spring:
   mail:
     host: mail.smtpbucket.com
     port: 8025
-    username: ""      
+    username: ""
     password: ""
-    smtp: 
+    smtp:
       protocol: smtp
       debug: true
-    properties.mail.smtp: 
+    properties.mail.smtp:
       auth: true
       starttls.enable: true
-      
+
   datasource:
     url: jdbc:postgresql://localhost/codechill_test
     username: code
@@ -38,6 +38,10 @@ jwt:
     authentication:
       path: auth
       refresh: refresh
+
+app:
+  dockerurl: http://localhost:2375
+  clienturl: http://localhost:3000
 
 #logging:
 #  level:

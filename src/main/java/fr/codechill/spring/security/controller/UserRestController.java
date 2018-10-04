@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
+@CrossOrigin(origins = {"${app.clienturl}"})
 public class UserRestController {
 
     @Value("${jwt.header}")
