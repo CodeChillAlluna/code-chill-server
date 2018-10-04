@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
+@CrossOrigin(origins = {"${app.clienturl}"})
 @RestController
 public class DockerRestController {
     private final Log logger =  LogFactory.getLog(this.getClass());

@@ -24,7 +24,7 @@ import fr.codechill.spring.security.service.JwtAuthenticationResponse;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
+@CrossOrigin(origins = {"${app.clienturl}"})
 public class AuthenticationRestController {
 
     @Value("${jwt.header}")

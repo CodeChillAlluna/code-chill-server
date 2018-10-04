@@ -2,7 +2,6 @@ package fr.codechill.spring.rest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -30,18 +30,23 @@ import fr.codechill.spring.exception.BadRequestException;
 import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.User;
-import fr.codechill.spring.repository.DockerRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
+@CrossOrigin(origins = {"${app.clienturl}"})
 @RestController
 public class UserController {
     private final UserRepository urepo;
-    private final DockerController dcontroller;
-    private final String SENDFROM = "codechill@hotmail.com";
-    private final String BASE_URL = "http://localhost:3000";
-    private final Log logger = LogFactory.getLog(this.getClass());;
+    @Value("${spring.mail.username}")
+    private String SENDFROM;
+
+    @Value("${app.clienturl}")
+    private String BASE_URL;
+
+    @Autowired
+    private DockerController dcontroller;
+  
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -52,9 +57,8 @@ public class UserController {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public UserController(UserRepository urepo, DockerRepository drepo) {
+    public UserController(UserRepository urepo) {
         this.urepo = urepo;
-        this.dcontroller = new DockerController(drepo);
     }
 
     @GetMapping("/user/{id}")
