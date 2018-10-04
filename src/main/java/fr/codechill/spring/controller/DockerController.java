@@ -34,10 +34,6 @@ public class DockerController {
     }
 
     public Docker createDocker() {
-        System.out.println("DOCKER URL");
-        System.out.println(this.BASE_URL);
-        logger.info("DOCKER URL");
-        logger.info(this.BASE_URL);
         String dockerCreatetUrl = BASE_URL + "/containers/create";
         RestTemplate restTemplate = new RestTemplate();
 

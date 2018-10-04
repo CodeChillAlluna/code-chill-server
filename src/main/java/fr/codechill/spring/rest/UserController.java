@@ -103,11 +103,6 @@ public class UserController {
 
     @PostMapping("/user")
     public ResponseEntity<?> addUser(@RequestBody User user) throws BadRequestException {
-        System.out.println("ADDUSER");
-        logger.info("ADDUSER");
-        logger.info(this.BASE_URL);
-        System.out.println(this.BASE_URL);
-        System.out.println(this.SENDFROM);
         HttpHeaders responseHeaders = new HttpHeaders();
         if (urepo.findByUsername(user.getUsername()) != null) {
             logger.info("An account with this username already exist ");
