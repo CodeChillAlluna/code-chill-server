@@ -37,8 +37,6 @@ import fr.codechill.spring.security.JwtTokenUtil;
 @RestController
 public class UserController {
     private final UserRepository urepo;
-    private static final Log logger = LogFactory.getLog(UserController.class);
-
     @Value("${spring.mail.username}")
     private String SENDFROM;
 
@@ -47,6 +45,8 @@ public class UserController {
 
     @Autowired
     private DockerController dcontroller;
+  
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
