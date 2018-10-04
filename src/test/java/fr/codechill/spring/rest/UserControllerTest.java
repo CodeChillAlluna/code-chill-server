@@ -160,6 +160,7 @@ public class UserControllerTest{
     }
     @Test
     public void testAddUserEmail() throws Exception {
+        this.testUser.setUsername("Nathou3");
         this.testUser.setEmail("admin@admin.com");
         this.mock.perform(post("/user")
             .contentType(MediaType.APPLICATION_JSON)
