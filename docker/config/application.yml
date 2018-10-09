@@ -13,8 +13,8 @@ spring:
   mail:
     host: 
     port: 587
-    username: "CHANGEME"
-    password: "CHANGEME"
+    username: ""
+    password: ""
     smtp:
       protocol: smtp
       debug: true
@@ -23,7 +23,7 @@ spring:
       starttls.enable: true
 
   datasource:
-    url: jdbc:postgresql://localhost/codechill
+    url: jdbc:postgresql://db/codechill
     username: code
     password: chill
 
@@ -31,7 +31,7 @@ spring:
     generate:
       ddl: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
 jwt:
   header: Authorization
@@ -47,7 +47,7 @@ logging:
   pattern:
     file: "%d %-5level [%thread] %logger : %msg%n"
   level:
-    ROOT: ERROR
+    ROOT: INFO
 
 app:
   dockerurl: http://localhost:2375

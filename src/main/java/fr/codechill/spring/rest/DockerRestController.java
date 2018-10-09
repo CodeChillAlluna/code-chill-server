@@ -3,8 +3,7 @@ package fr.codechill.spring.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-
-// import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,7 +21,10 @@ import org.apache.commons.logging.LogFactory;
 @RestController
 public class DockerRestController {
     private final Log logger =  LogFactory.getLog(this.getClass());
-    private final String BASE_URL = "http://localhost:2375";
+
+    //private String BASE_URL = "http://localhost:2375";
+    @Value("${app.dockerurl}")
+    private String BASE_URL;
 
     @PostMapping(value = "/containers/{id}/start", produces = "application/json")
     public ResponseEntity<?> startDocker(@PathVariable("id") String id) {

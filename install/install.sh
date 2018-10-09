@@ -59,10 +59,6 @@ docker_install () {
   WantedBy=multi-user.target" > /lib/systemd/system/docker.service
   systemctl daemon-reload
   systemctl restart docker
-}
-
-dockerfiles () {
-  # Installation of docker files
   export DOCKER_HOST=tcp://localhost:2375
   if ! grep -qF "DOCKER_HOST=tcp://localhost:2375" /etc/environment
   then
@@ -70,7 +66,10 @@ dockerfiles () {
   fi
   source /etc/environment
   systemctl restart docker
+}
 
+dockerfiles () {
+  # Installation of docker files
   git clone https://github.com/CodeChillAlluna/DockerFiles.git
   docker build -f DockerFiles/CodeChill-Ubuntu/DockerFile -t codechill/ubuntu-base .
   docker build -f DockerFiles/CodeChill-Ubuntu-User/DockerFile -t codechill/ubuntu-base-user .
