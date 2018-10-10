@@ -66,6 +66,7 @@ docker_install () {
   fi
   source /etc/environment
   systemctl restart docker
+  sudo apt-get install docker-compose -y
 }
 
 dockerfiles () {
@@ -104,7 +105,7 @@ EOF
 
 }
 
-install () {
+setup () {
   if ! grep -qF "cd "$vagrant $HOME_DIR/.bashrc
   then
           echo "cd "$vagrant >> $HOME_DIR/.bashrc
@@ -164,5 +165,5 @@ then
   docker_install
   dockerfiles
 else
-  install
+  setup
 fi

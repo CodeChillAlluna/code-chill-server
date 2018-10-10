@@ -62,4 +62,17 @@ public class DockerController {
         return docker;
     }
 
+    public ResponseEntity<?> dockerAction(String id, String action) {
+        String dockerStoptUrl = BASE_URL + "/containers/" + id + "/" + action;
+        ObjectMapper mapper = new ObjectMapper();
+        RestTemplate restTemplate = new RestTemplate();   
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
+        restTemplate.exchange(dockerStoptUrl, HttpMethod.POST, entity, String.class);
+        ObjectNode data = mapper.createObjectNode();
+        logger.info("" + action + "ing docker with the ID : " + id);
+        data.put("data", "Docker stoped");
+        return ResponseEntity.ok().headers(headers).body(data);
+    }
+
 }
