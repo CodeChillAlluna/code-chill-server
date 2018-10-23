@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,6 +61,32 @@ public class DockerRestController {
         return dcontroller.dockerAction(id, "stop");
     }
 
+    
+    @PostMapping(value = "/containers/{id}/pause", produces = "application/json")
+    public ResponseEntity<?> pauseDocker(@PathVariable("id") String id) {
+        return dcontroller.dockerAction(id, "pause");
+    }
+
+    
+    @PostMapping(value = "/containers/{id}/unpause", produces = "application/json")
+    public ResponseEntity<?> resumeDocker(@PathVariable("id") String id) {
+        return dcontroller.dockerAction(id, "unpause");
+    }
+
+    @DeleteMapping(value = "/containers/{id}/delete", produces = "application/json")
+    public ResponseEntity<?> deleteDocker(@PathVariable("id") String id) {
+        String dockerDeleteUrl = BASE_URL + "/containers/"+id;
+        ObjectMapper mapper = new ObjectMapper();
+        RestTemplate restTemplate = new RestTemplate();   
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
+        restTemplate.exchange(dockerDeleteUrl, HttpMethod.DELETE, entity, String.class);
+        ObjectNode data = mapper.createObjectNode();
+        logger.info("Deleting docker with the ID : " + id);
+        data.put("data", "Docker deleted");
+        return ResponseEntity.ok().headers(headers).body(data);
+    }
+
     @PostMapping(value="/dockers/create", produces = "application/json")
     public ResponseEntity<?> createDocker (@RequestHeader(value="Authorization") String token) {
         String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
@@ -76,6 +103,17 @@ public class DockerRestController {
         data.put("Id", dockerId);
         return ResponseEntity.ok().headers(headers).body(data);
 
+    }
+
+    public boolean checkLimiteDocker(Long id) {
+        boolean limitReached = true;
+        User user = this.urepo.findOne(id);
+        if (user.getNbDockers() < user.getLimiteDocker())
+        {
+            limitReached = false;
+            return limitReached;
+        }
+        return limitReached;
     }
 
 }

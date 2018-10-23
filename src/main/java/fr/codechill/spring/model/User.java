@@ -68,6 +68,12 @@ public class User implements Serializable {
     @NotNull
     private Date lastPasswordResetDate;
 
+    @Column(name="limitDocker")
+    private int nbDockers;
+
+    @Column(name="limitDocker")
+    private int limiteDocker;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_authority",
@@ -187,4 +193,19 @@ public class User implements Serializable {
         this.dockers.add(docker);
     }
 
+    public int getLimiteDocker() {
+        return this.limiteDocker;
+    }
+
+    public void setLimiteDocker(int limiteDocker) {
+        this.limiteDocker = limiteDocker;
+    }
+
+    public int getNbDockers() {
+        return this.nbDockers;
+    }
+
+    public void setNbDockers(int nbDockers) {
+        this.nbDockers = nbDockers;
+    }
 }

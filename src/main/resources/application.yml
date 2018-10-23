@@ -5,4 +5,4 @@ server:
 #Currently used Spring Profile
 spring:
   profiles:
-    active: "prod"
+    active: "dev"

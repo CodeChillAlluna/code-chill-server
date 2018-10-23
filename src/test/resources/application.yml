@@ -2,8 +2,8 @@
 server:
   contextPath:
 
-# JACKSON
 spring:
+  # JACKSON
   jackson:
     serialization:
       INDENT_OUTPUT: true

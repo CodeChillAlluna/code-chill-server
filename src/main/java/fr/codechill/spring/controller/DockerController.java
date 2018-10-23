@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.MediaType;
 
+import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.repository.DockerRepository;
 
@@ -36,7 +37,6 @@ public class DockerController {
     public Docker createDocker() {
         String dockerCreatetUrl = BASE_URL + "/containers/create";
         RestTemplate restTemplate = new RestTemplate();
-
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
         body.put("Image", "codechill/ubuntu-base-user");
@@ -71,12 +71,13 @@ public class DockerController {
         restTemplate.exchange(dockerStoptUrl, HttpMethod.POST, entity, String.class);
         ObjectNode data = mapper.createObjectNode();
         logger.info("" + action + "ing docker with the ID : " + id);
-        data.put("data", "Docker stoped");
+        data.put("data", "Docker " + action + "ed");
         return ResponseEntity.ok().headers(headers).body(data);
     }
 
     public String dockerCreation() {
         String dockerCreateUrl = BASE_URL +"/containers/create";
+        logger.info("URL USED : " + dockerCreateUrl);
         ObjectMapper mapper = new ObjectMapper();
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
