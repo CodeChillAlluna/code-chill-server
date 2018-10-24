@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
 import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.User;
@@ -52,44 +53,67 @@ public class DockerRestController {
     }
 
     @GetMapping(value="/dockers/user/{id}", produces ="application/json")
-    public ResponseEntity<?> getDockerInfo(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getDockersInfo(@PathVariable("id") Long id) {
         ObjectMapper mapper = new ObjectMapper();
-        RestTemplate restTemplate = new RestTemplate();   
         HttpHeaders headers = new HttpHeaders();
-        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
         ObjectNode data = mapper.createObjectNode();
+        ObjectNode dockersUser = mapper.createObjectNode();
         logger.info("ID récupéré : " + id);
         User user = this.urepo.findOne(id);
-        logger.info("Prenom de l'utilisateur traité  : " + user.getFirstname() +" nom de famille " + user.getLastname() );
+        logger.info("Prenom de l'utilisateur traité  : " + user.getFirstname() +" nom de famille : " + user.getLastname());
         logger.info("taille de la liste des dockers récupérés :  " + user.getDockers().size());
-        for (Docker dock : user.getDockers()) {
-            String dockerStatsUrl = BASE_URL + "/containers/" + dock.getName() + "/stats?stream=False";
-            ResponseEntity <?> resp = restTemplate.exchange(dockerStatsUrl, HttpMethod.GET, entity, String.class);
-            try {
-                JsonNode dockerJson = mapper.readTree(resp.getBody().toString());
-                logger.info("CONTENU BODY RESPONSE ENTITY : " + dockerJson);
-                String dName = dockerJson.get("name").asText();
-                Long dId = dockerJson.get("id").asLong();
-                Long dMemLimit = dockerJson.get("memory_stats").get("limit").asLong() / 1048576;
-                Long dMemUsage = dockerJson.get("memory_stats").get("usage").asLong() / 1048576;
-                // logger.info("" + dName + " - " + dId + " - " + dMemLimit + " - " + dMemUsage);
-
-                Double cpuTotalUsage = (double) dockerJson.get("cpu_stats").get("cpu_usage").get("total_usage").asLong();
-                Double preCpuTotalUsage = (double) dockerJson.get("precpu_stats").get("cpu_usage").get("total_usage").asLong();
-                Double usageInUsermode = (double) dockerJson.get("cpu_stats").get("cpu_usage").get("usage_in_usermode").asLong();
-                Double systemCpuUsage = (double) dockerJson.get("cpu_stats").get("system_cpu_usage").asLong();
-                Double systemPreCpuUsage = (double) dockerJson.get("precpu_stats").get("system_cpu_usage").asLong();
-                
-                Double res = (cpuTotalUsage / systemCpuUsage);
-                logger.info(res);
-                //Double cpuPercent = (double) ((cpuTotalUsage - preCpuTotalUsage) / (systemCpuUsage- systemPreCpuUsage)) * 100;
-                // logger.info("" + cpuTotalUsage + " - " + preCpuTotalUsage + " - " + systemCpuUsage + " - " + systemPreCpuUsage);
-                //logger.info("" + cpuPercent);
-            } catch(Exception e) {
-
-            }
+        for (Docker dock : user.getDockers()) {        
+            dockersUser.set(dock.getId().toString(),this.getDockerInfo(dock));
+            logger.info("dockers utilisateur récupérés : " + dockersUser);
         }
         return ResponseEntity.ok().headers(headers).body(data);
     }
 
+    public JsonNode getDockerInfo (Docker docker) {
+        JsonNode jsonDocker;
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode statDocker = mapper.createObjectNode();
+        RestTemplate restTemplate = new RestTemplate();
+        String dockerStatUrl = BASE_URL + "/containers/" + docker.getName() + "/stats?stream=False";
+        ResponseEntity <?> resp = restTemplate.exchange(dockerStatUrl, HttpMethod.GET, entity, String.class);
+        try {
+            jsonDocker = mapper.readTree(resp.getBody().toString());
+            logger.info(" Docker content : " + jsonDocker.toString());
+
+            ObjectNode precpu_stats = mapper.createObjectNode();
+            Double preCpuTotalUsage = (double) jsonDocker.get("precpu_stats").get("cpu_usage").get("total_usage").asLong();
+            precpu_stats.put("total_usage",preCpuTotalUsage);
+            Double kernel = (double) jsonDocker.get("cpu_stats").get("cpu_usage").get("usage_in_kernelmode").asLong();
+            precpu_stats.put("usage_in_kernelmode",kernel);
+            Double usageInUsermode = (double) jsonDocker.get("cpu_stats").get("cpu_usage").get("usage_in_usermode").asLong();
+            precpu_stats.put("usage_in_usermode",usageInUsermode);
+
+            statDocker.set("precpu_stats",precpu_stats);      
+            logger.info("stat docker  content : " + statDocker.toString());
+
+            ObjectNode memory_stats = mapper.createObjectNode();
+
+            try {
+                Double max_usage = (double) jsonDocker.get("memory_stats").get("max_usage").asLong();
+                memory_stats.put("max_usage",max_usage);
+                Double usage = (double) jsonDocker.get("memory_stats").get("usage").asLong();
+                memory_stats.put("usage",usage);
+                Double limit = (double) jsonDocker.get("memory_stats").get("limit").asLong();
+                memory_stats.put("limit",limit);
+                statDocker.set("memory_stats",memory_stats);
+                logger.info("stat docker content with memory : " + statDocker.toString());
+            }
+            catch (Exception e) {
+                memory_stats.put("memory_stats","docker offline");
+                statDocker.set("memory_usage",memory_stats);
+            }
+            
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return statDocker;
+    }
 }
