@@ -37,7 +37,7 @@ public class DockerTest {
     @Test
     public void testSetUsers() {
         this.users.clear();
-        Docker dockTest = new Docker(this.name);
+        Docker dockTest = new Docker(this.name, 1);
         this.users.add(this.userDummy1);
         dockTest.setUsers(this.users);
         assertNotNull(dockTest.getUsers());
@@ -45,19 +45,19 @@ public class DockerTest {
 
     @Test
     public void testGetLanguages() {
-        Docker dockTest = new Docker (this.name);
+        Docker dockTest = new Docker (this.name, 1);
         dockTest.setLanguages(this.languages);
         assertNotNull(dockTest.getLanguages());
     }
     @Test
     public void testGetName() {
-        Docker dockTest = new Docker (this.name);
+        Docker dockTest = new Docker (this.name, 1);
         assertEquals(this.name, dockTest.getName());
     }
 
     @Test
     public void testGetUsers() {
-        Docker dockTest = new Docker(this.name);
+        Docker dockTest = new Docker(this.name, 1);
         dockTest.setUsers(this.users);
         assertNotNull(dockTest.getUsers());
     }
