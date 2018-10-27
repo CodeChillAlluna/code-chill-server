@@ -84,18 +84,23 @@ public class DockerController {
         return docker;
     }
 
-    public ResponseEntity<?> dockerAction(String id, String action) {
-        String dockerStoptUrl = BASE_URL + "/containers/" + id + "/" + action;
-        ObjectMapper mapper = new ObjectMapper();
+    public ResponseEntity<?> deleteDocker(String id) {
+        String dockerDeleteUrl = BASE_URL + "/containers/" + id;
         RestTemplate restTemplate = new RestTemplate();   
         HttpHeaders headers = new HttpHeaders();
-        ObjectNode body = mapper.createObjectNode();
-        ObjectNode data = mapper.createObjectNode();
-        HttpEntity<String> entity = new HttpEntity<String>(body.toString(), headers);
-        HttpEntity<String> test = restTemplate.exchange(dockerStoptUrl, HttpMethod.POST, entity, String.class);
-        logger.info(test.toString());
-        logger.info("" + action + "ing docker with the ID : " + id);
-        data.put("data", "Docker " + action + "ed");
-        return ResponseEntity.ok().headers(headers).body(data);
+        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
+        ResponseEntity<String> res = restTemplate.exchange(dockerDeleteUrl, HttpMethod.DELETE, entity, String.class);
+        logger.info("Deleting docker " + id + " : " + res.getBody());
+        return res;
+    }
+
+    public ResponseEntity<?> dockerAction(String id, String action) {
+        String dockerActionUrl = BASE_URL + "/containers/" + id + "/" + action;
+        RestTemplate restTemplate = new RestTemplate();   
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
+        ResponseEntity<String> res = restTemplate.exchange(dockerActionUrl, HttpMethod.POST, entity, String.class);
+        logger.info("" + action + "ing docker " + id + " with status code : " + res.getStatusCodeValue());
+        return res;
     }
 }

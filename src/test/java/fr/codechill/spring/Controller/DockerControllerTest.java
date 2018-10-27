@@ -1,26 +1,45 @@
 package fr.codechill.spring.Controller;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import fr.codechill.spring.controller.DockerController;
-import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.utils.docker.DockerActions;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DockerControllerTest {
-    private DockerRepository drepo;
 
     @Autowired
     private DockerController dockerController;
 
+    private static String dockerId;
+
     @Test
-    public void createDockerTest () {
-        assertNotEquals(this.dockerController.createDocker(), null);
+    public void aCreateDockerTest () {
+        Docker docker = this.dockerController.createDocker();
+        dockerId = docker.getName();
+        assertNotNull(docker);
+    }
+
+    @Test
+    public void bDockerActionTest () {
+        String action = DockerActions.STOP.toString();
+        assertEquals(this.dockerController.dockerAction(dockerId, action).getStatusCodeValue(), 304);
+    }
+
+    @Test
+    public void cDeleteDockerTest () {
+        assertEquals(this.dockerController.deleteDocker(dockerId).getStatusCodeValue(), 204);
     }
 }

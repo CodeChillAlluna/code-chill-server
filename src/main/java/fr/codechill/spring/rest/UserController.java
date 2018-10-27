@@ -64,6 +64,7 @@ public class UserController {
     @GetMapping("/user/{id}")
     public User getUser(@PathVariable("id") Long id) {
         User user = this.urepo.findOne(id);
+        logger.info(user);
         logger.info("getting user informations");
         return user;
     }
