@@ -14,21 +14,19 @@ import java.util.List;
 @SpringBootTest
 public class AuthorityTest {
 
-    private User user;
     private List <User> users;
-    private Authority authority;
 
     @Before 
     public void setUp() {
-        this.user = new User("lastname", "firstname");
+        User user = new User("lastname", "firstname");
         this.users = new ArrayList<User>();
-        users.add(user);
+        this.users.add(user);
     }
 
     @Test
     public void testGetSetUsers() {
-        this.authority = new Authority();
-        this.authority.setUsers(users);
-        assertEquals(this.authority.getUsers(), this.users);
+        Authority authority = new Authority();
+        authority.setUsers(users);
+        assertEquals(authority.getUsers(), this.users);
     }
 }
