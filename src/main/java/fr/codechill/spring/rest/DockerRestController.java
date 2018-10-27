@@ -68,9 +68,9 @@ public class DockerRestController {
     }
 
     
-    @PostMapping(value = "/containers/{id}/unpause", produces = "application/json")
+    @PostMapping(value = "/containers/{id}/resume", produces = "application/json")
     public ResponseEntity<?> resumeDocker(@PathVariable("id") String id) {
-        return dcontroller.dockerAction(id, "unpause");
+        return dcontroller.dockerAction(id, "resume");
     }
 
     @DeleteMapping(value = "/containers/{id}/delete", produces = "application/json")
@@ -91,8 +91,7 @@ public class DockerRestController {
     public ResponseEntity<?> createDocker (@RequestHeader(value="Authorization") String token) {
         String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
         User user = this.urepo.findByUsername(username);
-        String dockerId =  dcontroller.dockerCreation();
-        Docker docker = new Docker (dockerId);
+        Docker docker =  dcontroller.createDocker();
         this.drepo.save(docker);
         user.addDocker(docker);
         this.urepo.save(user);
@@ -100,20 +99,8 @@ public class DockerRestController {
         HttpHeaders headers = new HttpHeaders();
         ObjectNode data = mapper.createObjectNode();
         data.put("Message", "Docker created");
-        data.put("Id", dockerId);
+        data.put("Id", docker.getId());
         return ResponseEntity.ok().headers(headers).body(data);
-
-    }
-
-    public boolean checkLimiteDocker(Long id) {
-        boolean limitReached = true;
-        User user = this.urepo.findOne(id);
-        if (user.getNbDockers() < user.getLimiteDocker())
-        {
-            limitReached = false;
-            return limitReached;
-        }
-        return limitReached;
     }
 
 }

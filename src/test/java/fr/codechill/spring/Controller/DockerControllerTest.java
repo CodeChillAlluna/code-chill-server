@@ -1,5 +1,6 @@
 package fr.codechill.spring.Controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import static org.junit.Assert.assertEquals;
@@ -26,15 +27,12 @@ import fr.codechill.spring.repository.DockerRepository;
 @SpringBootTest
 public class DockerControllerTest {
     private DockerRepository drepo;
+
+    @Autowired
     private DockerController dockerController;
 
-    @Before
-    public void setUp() {
-        this.dockerController = new DockerController(this.drepo);
-    }
-
     @Test
-    public void dockerCreationTest () {
-        assertNotEquals(this.dockerController.dockerCreation(),"-1");
+    public void createDockerTest () {
+        assertNotEquals(this.dockerController.createDocker(), null);
     }
 }

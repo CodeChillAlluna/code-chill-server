@@ -19,7 +19,7 @@ public class LanguageTest {
     public void setUp() {
         this.id = 1L;
         this.name = "testLanguage";
-        this.docker = new Docker ("test");
+        this.docker = new Docker ("test", 1);
         this.dockers = new ArrayList<>();
         dockers.add(docker);
     }

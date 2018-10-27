@@ -99,37 +99,4 @@ public class DockerController {
         data.put("data", "Docker " + action + "ed");
         return ResponseEntity.ok().headers(headers).body(data);
     }
-
-    public String dockerCreation() {
-        String dockerCreateUrl = BASE_URL +"/containers/create";
-        logger.info("URL USED : " + dockerCreateUrl);
-        ObjectMapper mapper = new ObjectMapper();
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ObjectNode data = mapper.createObjectNode();
-        data.put("Image", "codechill/ubuntu-base-user");
-        data.put("Hostname", "chill");
-        data.put("tty", true);
-        data.put("OpenStdin", true);
-        data.put("AttachStdin", true);
-        data.put("StdinOnce", true);
-        
-        HttpEntity<String> entity = new HttpEntity<String>(data.toString(), headers);
-        ResponseEntity <?> resp = restTemplate.exchange(dockerCreateUrl, HttpMethod.POST, entity, String.class);
-
-        logger.info("Creation du docker");
-        String dockerId = "-1";
-        try {
-            JsonNode response = mapper.readTree(resp.getBody().toString());
-            dockerId = response.get("Id").asText();
-            logger.info("Id : " + dockerId);
-
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-        return dockerId;
-    }
-
 }
