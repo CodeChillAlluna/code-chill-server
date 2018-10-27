@@ -2,8 +2,8 @@
 server:
   contextPath:
 
-# JACKSON
 spring:
+  # JACKSON
   jackson:
     serialization:
       INDENT_OUTPUT: true
@@ -42,6 +42,8 @@ jwt:
 app:
   dockerurl: http://localhost:2375
   clienturl: http://localhost:3000
+  minPort: 64000
+  maxPort: 65535
 
 #logging:
 #  level:

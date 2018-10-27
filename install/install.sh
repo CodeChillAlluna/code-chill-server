@@ -70,7 +70,8 @@ docker_install () {
 }
 
 dockerfiles () {
-  # Installation of docker files
+  # Installation of docker 
+  docker pull theiaide/theia-full:next
   git clone https://github.com/CodeChillAlluna/DockerFiles.git
   docker build -f DockerFiles/CodeChill-Ubuntu/DockerFile -t codechill/ubuntu-base .
   docker build -f DockerFiles/CodeChill-Ubuntu-User/DockerFile -t codechill/ubuntu-base-user .

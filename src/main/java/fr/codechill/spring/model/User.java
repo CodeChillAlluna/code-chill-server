@@ -187,4 +187,7 @@ public class User implements Serializable {
         this.dockers.add(docker);
     }
 
+    public void deleteDocker(Docker docker) {
+        this.dockers.remove(docker);
+    }
 }
