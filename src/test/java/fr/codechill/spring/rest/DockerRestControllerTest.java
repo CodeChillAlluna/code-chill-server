@@ -32,7 +32,7 @@ import fr.codechill.spring.CodeChillApplication;
 @SpringBootTest(classes=CodeChillApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@FixMethodOrder(MethodSorters.JVM)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DockerRestControllerTest{
 
     private MockMvc mock;
@@ -74,7 +74,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void createDockerTest() throws Exception {
+    public void aCreateDockerTest() throws Exception {
         String res = this.mock.perform(post("/containers/create")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -91,7 +91,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void startDockerTest() throws Exception {
+    public void bStartDockerTest() throws Exception {
         this.mock.perform(post("/containers/" + dockerId + "/start")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -99,7 +99,15 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void pauseDockerTest() throws Exception {
+    public void cStartDockerInvalidIdTest() throws Exception {
+        this.mock.perform(post("/containers/" + 500 + "/start")
+            .header("Authorization", "Bearer " + jwtToken)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void dPpauseDockerTest() throws Exception {
         this.mock.perform(post("/containers/" + dockerId + "/pause")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -107,7 +115,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void resumeDockerTest() throws Exception {
+    public void eResumeDockerTest() throws Exception {
         this.mock.perform(post("/containers/" + dockerId + "/resume")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -115,7 +123,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void stopDockerTest() throws Exception {
+    public void fStopDockerTest() throws Exception {
         this.mock.perform(post("/containers/" + dockerId + "/stop")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -123,7 +131,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void deleteDockerTest() throws Exception {
+    public void gDeleteDockerTest() throws Exception {
         this.mock.perform(delete("/containers/" + dockerId)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -131,7 +139,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void deleteDockerIncorrectIdTest() throws Exception {
+    public void hDeleteDockerIncorrectIdTest() throws Exception {
         this.mock.perform(delete("/containers/" + 500)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))

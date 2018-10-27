@@ -1,4 +1,4 @@
-package fr.codechill.spring.Controller;
+package fr.codechill.spring.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

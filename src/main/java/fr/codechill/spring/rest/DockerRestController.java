@@ -31,21 +31,17 @@ import fr.codechill.spring.utils.docker.DockerActions;
 public class DockerRestController {
     private final UserRepository urepo;
     private final DockerRepository drepo;
-    private final Log logger =  LogFactory.getLog(this.getClass());
+    // private final Log logger =  LogFactory.getLog(this.getClass());
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private DockerController dcontroller;
 
     @Autowired
     public DockerRestController(UserRepository urepo, DockerRepository drepo) {
         this.urepo = urepo;
         this.drepo = drepo;
     }
-
-    @Value("${app.dockerurl}")
-    private String BASE_URL;
-
-    @Autowired
-    private DockerController dcontroller;
 
     private ResponseEntity<?> dockerAction(String userToken, Long dockerId, DockerActions action) {
         Docker docker = drepo.findOne(dockerId);
@@ -105,7 +101,7 @@ public class DockerRestController {
     public ResponseEntity<?> createDocker (@RequestHeader(value="Authorization") String token) {
         Docker docker =  dcontroller.createDocker();
         HttpHeaders headers = new HttpHeaders();
-        if (docker.equals(null)) {
+        if (docker == null) {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode body = mapper.createObjectNode();
             body.put("Message", "Something went wrong while creating a container");

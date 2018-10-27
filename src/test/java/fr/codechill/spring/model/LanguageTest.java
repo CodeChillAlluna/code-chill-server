@@ -3,14 +3,15 @@ package fr.codechill.spring.model;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.junit.Test;
 import org.junit.Before;
-import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
+
 @SpringBootTest
 public class LanguageTest {
-    private long id;
+
+    private Long id;
     private String name;
     private Docker docker;
     private Language language;
@@ -25,10 +26,17 @@ public class LanguageTest {
     }
 
     @Test
+    public void testGetId() {
+        this.language = new Language("test");
+        this.language.setId(this.id);
+        assertEquals(this.id, language.getId());
+    }
+
+    @Test
     public void testGetName() {
         this.language = new Language("test");
         this.language.setName(this.name);
-        assertEquals(this.name, language.getName());;
+        assertEquals(this.name, language.getName());
     }
 
     @Test
