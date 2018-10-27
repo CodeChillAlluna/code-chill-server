@@ -35,10 +35,10 @@ import fr.codechill.spring.CodeChillApplication;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DockerRestControllerTest{
 
-    private MockMvc mock;
     @Autowired
     private WebApplicationContext context;
 
+    private MockMvc mock;
     private static String jwtToken;
     private static Long dockerId;
     private ObjectMapper mapper;

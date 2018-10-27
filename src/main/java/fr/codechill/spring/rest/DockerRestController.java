@@ -63,7 +63,6 @@ public class DockerRestController {
     public ResponseEntity<?> stopDocker(@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id) {
         return this.dockerAction(token, id, DockerActions.STOP);
     }
-
     
     @PostMapping(value = "/containers/{id}/pause", produces = "application/json")
     public ResponseEntity<?> pauseDocker(@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id) {

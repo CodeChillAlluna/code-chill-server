@@ -16,6 +16,7 @@ public class LanguageTest {
     private Docker docker;
     private Language language;
     private List <Docker> dockers;
+    
     @Before 
     public void setUp() {
         this.id = 1L;
