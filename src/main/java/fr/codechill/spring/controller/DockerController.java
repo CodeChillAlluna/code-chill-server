@@ -15,10 +15,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.util.SocketUtils;
+import org.springframework.web.client.RestTemplate;
 
-import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.repository.DockerRepository;
 

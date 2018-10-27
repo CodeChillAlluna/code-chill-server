@@ -1,6 +1,5 @@
 package fr.codechill.spring.rest;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -16,17 +15,16 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.bind.annotation.RequestHeader;
-import fr.codechill.spring.security.JwtTokenUtil;
-import springfox.documentation.spring.web.json.Json;
-import fr.codechill.spring.repository.UserRepository;
+
 import fr.codechill.spring.controller.DockerController;
-import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.Docker;
-import fr.codechill.spring.controller.DockerController;
+import fr.codechill.spring.model.User;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.repository.UserRepository;
+import fr.codechill.spring.security.JwtTokenUtil;
 
 
 
