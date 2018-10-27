@@ -1,13 +1,13 @@
 package fr.codechill.spring.rest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import fr.codechill.spring.exception.BadRequestException;
 import fr.codechill.spring.controller.DockerController;
+import fr.codechill.spring.exception.BadRequestException;
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.repository.UserRepository;
@@ -64,6 +64,7 @@ public class UserController {
     @GetMapping("/user/{id}")
     public User getUser(@PathVariable("id") Long id) {
         User user = this.urepo.findOne(id);
+        logger.info(user);
         logger.info("getting user informations");
         return user;
     }
