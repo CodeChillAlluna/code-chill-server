@@ -103,4 +103,14 @@ public class DockerController {
         logger.info("" + action + "ing docker " + id + " with status code : " + res.getStatusCodeValue());
         return res;
     }
+
+    public ResponseEntity<?> getDockerStats(String id) {
+        String dockerActionUrl = BASE_URL + "/containers/" + id + "/" + "/stats?stream=False";
+        RestTemplate restTemplate = new RestTemplate();   
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
+        ResponseEntity<String> res = restTemplate.exchange(dockerActionUrl, HttpMethod.GET, entity, String.class);
+        logger.info("Get stats for docker " + id + " with status code : " + res.getStatusCodeValue());
+        return res;
+    }
 }

@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,6 +25,7 @@ import fr.codechill.spring.repository.DockerRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import fr.codechill.spring.utils.docker.DockerActions;
+import fr.codechill.spring.utils.docker.DockerStats;
 
 
 
@@ -57,6 +59,8 @@ public class DockerRestController {
             body.put("Message", "The docker with id " + dockerId + " doesn't exist or you don't own it!");
             return ResponseEntity.badRequest().headers(headers).body(body);
         }
+        if (action.equals(DockerActions.STATS))
+            return dcontroller.getDockerStats(docker.getName());
         return dcontroller.dockerAction(docker.getName(), action.toString());
     }
 
@@ -117,52 +121,30 @@ public class DockerRestController {
         return ResponseEntity.ok().headers(headers).body(docker);
     }
 
-    public JsonNode getDockerInfo (Docker docker) {
-        JsonNode jsonDocker;
+    @GetMapping(value="/containers/{id}/stats", produces = "application/json")
+    public ResponseEntity<?> getDockerStats (@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id) {
+        ResponseEntity<?> resp = this.dockerAction(token, id, DockerActions.STATS);
         HttpHeaders headers = new HttpHeaders();
-        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
         ObjectMapper mapper = new ObjectMapper();
-        ObjectNode statDocker = mapper.createObjectNode();
-        RestTemplate restTemplate = new RestTemplate();
-        /* String dockerStatUrl = BASE_URL + "/containers/" + docker.getName() + "/stats?stream=False";
-        ResponseEntity <?> resp = restTemplate.exchange(dockerStatUrl, HttpMethod.GET, entity, String.class);
+        DockerStats dockerStats = new DockerStats();
+        if (resp.getStatusCodeValue() > 299)
+            return resp;
         try {
-            jsonDocker = mapper.readTree(resp.getBody().toString());
-            logger.info(" Docker content : " + jsonDocker.toString());
-
-            ObjectNode precpu_stats = mapper.createObjectNode();
-            Double preCpuTotalUsage = (double) jsonDocker.get("precpu_stats").get("cpu_usage").get("total_usage").asLong();
-            precpu_stats.put("total_usage",preCpuTotalUsage);
-            Double kernel = (double) jsonDocker.get("cpu_stats").get("cpu_usage").get("usage_in_kernelmode").asLong();
-            precpu_stats.put("usage_in_kernelmode",kernel);
-            Double usageInUsermode = (double) jsonDocker.get("cpu_stats").get("cpu_usage").get("usage_in_usermode").asLong();
-            precpu_stats.put("usage_in_usermode",usageInUsermode);
-
-            statDocker.set("precpu_stats",precpu_stats);      
-            logger.info("stat docker  content : " + statDocker.toString());
-
-            ObjectNode memory_stats = mapper.createObjectNode();
-
-            try {
-                Double max_usage = (double) jsonDocker.get("memory_stats").get("max_usage").asLong();
-                memory_stats.put("max_usage",max_usage);
-                Double usage = (double) jsonDocker.get("memory_stats").get("usage").asLong();
-                memory_stats.put("usage",usage);
-                Double limit = (double) jsonDocker.get("memory_stats").get("limit").asLong();
-                memory_stats.put("limit",limit);
-                statDocker.set("memory_stats",memory_stats);
-                logger.info("stat docker content with memory : " + statDocker.toString());
-            }
-            catch (Exception e) {
-                memory_stats.put("memory_stats","docker offline");
-                statDocker.set("memory_usage",memory_stats);
-            }
-            
+            JsonNode jsonDocker = mapper.readTree(resp.getBody().toString());
+            dockerStats.setDockerId(jsonDocker.get("id").asText());
+            dockerStats.setName(jsonDocker.get("name").asText());
+            dockerStats.setMemoryLimit(jsonDocker.get("memory_stats").get("limit").asDouble() / 1000000);
+            dockerStats.setMemoryUsage(jsonDocker.get("memory_stats").get("usage").asDouble() / 1000000);
+            Long total_usage = jsonDocker.get("cpu_stats").get("cpu_usage").get("total_usage").asLong();
+            Long system_cpu_usage = jsonDocker.get("cpu_stats").get("system_cpu_usage").asLong();
+            logger.info(total_usage);
+            logger.info(system_cpu_usage);
+            logger.info((double) (total_usage / system_cpu_usage) * 100);
+            dockerStats.setCpuPercent((double) (total_usage / system_cpu_usage) * 100);
         }
         catch (Exception e) {
-            e.printStackTrace();
-        } */
-        return statDocker;
+            logger.info("Cannot retrieve stats, is the docker on ?");
+        }
+        return ResponseEntity.ok().headers(headers).body(dockerStats);
     }
-
 }
