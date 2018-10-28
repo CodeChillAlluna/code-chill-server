@@ -132,7 +132,15 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void gStopDockerTest() throws Exception {
+    public void gRestartDockerTest() throws Exception {
+        this.mock.perform(post("/containers/" + dockerId + "/restart")
+            .header("Authorization", "Bearer " + jwtToken)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void hStopDockerTest() throws Exception {
         this.mock.perform(post("/containers/" + dockerId + "/stop")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -140,7 +148,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void hDockerStatsNoStatsTest() throws Exception {
+    public void iDockerStatsNoStatsTest() throws Exception {
         try {
             this.mock.perform(get("/containers/" + dockerId + "/stats")
             .header("Authorization", "Bearer " + jwtToken)
@@ -149,7 +157,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void iDeleteDockerTest() throws Exception {
+    public void jDeleteDockerTest() throws Exception {
         this.mock.perform(delete("/containers/" + dockerId)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -157,7 +165,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void jDeleteDockerIncorrectIdTest() throws Exception {
+    public void kDeleteDockerIncorrectIdTest() throws Exception {
         this.mock.perform(delete("/containers/" + 500)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -165,7 +173,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void kDockerStatsInvalidTest() throws Exception {
+    public void lDockerStatsInvalidTest() throws Exception {
         this.mock.perform(get("/containers/" + 500 + "/stats")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))

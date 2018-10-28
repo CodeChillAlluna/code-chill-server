@@ -88,6 +88,11 @@ public class DockerRestController {
         return this.dockerAction(token, id, DockerActions.RESUME);
     }
 
+    @PostMapping(value = "/containers/{id}/restart", produces = "application/json")
+    public ResponseEntity<?> restartDocker(@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id) {
+        return this.dockerAction(token, id, DockerActions.RESTART);
+    }
+
     @DeleteMapping(value = "/containers/{id}", produces = "application/json")
     public ResponseEntity<?> deleteDocker(@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id) {
         Docker docker = drepo.findOne(id);

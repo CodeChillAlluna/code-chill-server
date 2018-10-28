@@ -27,25 +27,33 @@ public class DockerControllerTest {
     private static String dockerId;
 
     @Test
-    public void aCreateDockerTest () {
+    public void aCreateDockerTest() {
         Docker docker = this.dockerController.createDocker();
         dockerId = docker.getName();
         assertNotNull(docker);
     }
 
     @Test
-    public void bDockerActionTest () {
+    public void bDockerActionTest() {
         String action = DockerActions.START.toString();
         assertEquals(this.dockerController.dockerAction(dockerId, action, HttpMethod.POST).getStatusCodeValue(), 204);
     }
 
     @Test
-    public void cDockerStatsTest () {
+    public void cDockerStatsTest() {
         assertEquals(this.dockerController.getDockerStats(dockerId).getStatusCodeValue(), 200);
     }
 
     @Test
-    public void eDeleteDockerTest () {
+    public void dDockerInspectNoInfoTest() throws Exception {
+        try {
+            String action = DockerActions.INSPECT.toString();
+            this.dockerController.dockerAction(dockerId, action, HttpMethod.POST);
+        } catch (Exception expected) {}
+    }
+
+    @Test
+    public void eDeleteDockerTest() {
         String action = DockerActions.STOP.toString();
         this.dockerController.dockerAction(dockerId, action, HttpMethod.POST);
         assertEquals(this.dockerController.deleteDocker(dockerId).getStatusCodeValue(), 204);
