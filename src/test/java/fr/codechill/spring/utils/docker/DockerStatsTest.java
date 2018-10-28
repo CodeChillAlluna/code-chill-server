@@ -1,6 +1,10 @@
 package fr.codechill.spring.utils.docker;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+import java.util.Objects;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,5 +53,35 @@ public class DockerStatsTest {
         assertEquals(dockerStats.getMemoryLimit(), this.memoryLimit);
         assertEquals(dockerStats.getMemoryUsage(), this.memoryUsage);
         assertEquals(dockerStats.getCpuPercent(), this.cpuPercent);
+    }
+
+    @Test
+    public void testToString() {
+        DockerStats dockerStats = new DockerStats();
+        assertEquals(dockerStats.toString(), "{" +
+        " dockerId='" + "" + "'" +
+        ", name='" + "" + "'" +
+        ", memoryLimit='" + 0.0d + "'" +
+        ", memoryUsage='" + 0.0d + "'" +
+        ", cpuPercent='" + 0.0d + "'" +
+        "}");
+    }
+
+    @Test
+    public void testHashCode() {
+        DockerStats dockerStats = new DockerStats();
+        assertEquals(dockerStats.hashCode(), Objects.hash("", "", 0.0d, 0.0d, 0.0d));
+    }
+
+    @Test
+    public void testEqualsTrue() {
+        DockerStats dockerStats = new DockerStats();
+        assertTrue(dockerStats.equals(dockerStats));
+    }
+
+    @Test
+    public void testEqualsFalse() {
+        DockerStats dockerStats = new DockerStats();
+        assertFalse(dockerStats.equals(new Object()));
     }
 }

@@ -34,12 +34,24 @@ public class DockerControllerTest {
 
     @Test
     public void bDockerActionTest () {
-        String action = DockerActions.STOP.toString();
-        assertEquals(this.dockerController.dockerAction(dockerId, action).getStatusCodeValue(), 304);
+        String action = DockerActions.START.toString();
+        assertEquals(this.dockerController.dockerAction(dockerId, action).getStatusCodeValue(), 204);
     }
 
     @Test
-    public void cDeleteDockerTest () {
+    public void cDockerStatsTest () {
+        assertEquals(this.dockerController.getDockerStats(dockerId).getStatusCodeValue(), 200);
+    }
+
+    /* @Test
+    public void dDockerStatsInvalidTest () {
+        assertEquals(this.dockerController.getDockerStats("1").getStatusCodeValue(), 404);
+    } */
+
+    @Test
+    public void eDeleteDockerTest () {
+        String action = DockerActions.STOP.toString();
+        this.dockerController.dockerAction(dockerId, action);
         assertEquals(this.dockerController.deleteDocker(dockerId).getStatusCodeValue(), 204);
     }
 }

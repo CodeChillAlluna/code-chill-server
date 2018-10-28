@@ -3,6 +3,7 @@ package fr.codechill.spring.rest;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -123,7 +124,15 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void fStopDockerTest() throws Exception {
+    public void fDockerStatsTest() throws Exception {
+        this.mock.perform(get("/containers/" + dockerId + "/stats")
+            .header("Authorization", "Bearer " + jwtToken)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void gStopDockerTest() throws Exception {
         this.mock.perform(post("/containers/" + dockerId + "/stop")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -131,7 +140,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void gDeleteDockerTest() throws Exception {
+    public void hDeleteDockerTest() throws Exception {
         this.mock.perform(delete("/containers/" + dockerId)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -139,11 +148,19 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void hDeleteDockerIncorrectIdTest() throws Exception {
+    public void iDeleteDockerIncorrectIdTest() throws Exception {
         this.mock.perform(delete("/containers/" + 500)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is4xxClientError());
     }
+
+    /*@Test
+    public void jDockerStatsInvalidTest() throws Exception {
+        this.mock.perform(get("/containers/" + 500 + "/stats")
+            .header("Authorization", "Bearer " + jwtToken)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
+    }*/
 
 }
