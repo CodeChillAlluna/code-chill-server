@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,7 +60,12 @@ public class DockerRestController {
         }
         if (action.equals(DockerActions.STATS))
             return dcontroller.getDockerStats(docker.getName());
-        return dcontroller.dockerAction(docker.getName(), action.toString());
+        ResponseEntity<?> res;
+        if (action.equals(DockerActions.INSPECT))
+            res = dcontroller.dockerAction(docker.getName(), action.toString(), HttpMethod.GET);
+        else
+            res = dcontroller.dockerAction(docker.getName(), action.toString(), HttpMethod.POST);
+        return res;
     }
 
     @PostMapping(value = "/containers/{id}/start", produces = "application/json")
@@ -122,27 +128,13 @@ public class DockerRestController {
     @GetMapping(value="/containers/{id}/stats", produces = "application/json")
     public ResponseEntity<?> getDockerStats (@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id) {
         ResponseEntity<?> resp = this.dockerAction(token, id, DockerActions.STATS);
+        ResponseEntity<?> respInspect = this.dockerAction(token, id, DockerActions.INSPECT);
         HttpHeaders headers = new HttpHeaders();
-        ObjectMapper mapper = new ObjectMapper();
-        DockerStats dockerStats = new DockerStats();
         if (resp.getStatusCodeValue() > 299)
             return resp;
-        try {
-            JsonNode jsonDocker = mapper.readTree(resp.getBody().toString());
-            dockerStats.setDockerId(jsonDocker.get("id").asText());
-            dockerStats.setName(jsonDocker.get("name").asText());
-            dockerStats.setMemoryLimit(jsonDocker.get("memory_stats").get("limit").asDouble() / 1000000);
-            dockerStats.setMemoryUsage(jsonDocker.get("memory_stats").get("usage").asDouble() / 1000000);
-            Long total_usage = jsonDocker.get("cpu_stats").get("cpu_usage").get("total_usage").asLong();
-            Long system_cpu_usage = jsonDocker.get("cpu_stats").get("system_cpu_usage").asLong();
-            logger.info(total_usage);
-            logger.info(system_cpu_usage);
-            logger.info((double) (total_usage / system_cpu_usage) * 100);
-            dockerStats.setCpuPercent((double) (total_usage / system_cpu_usage) * 100);
-        }
-        catch (Exception e) {
-            logger.info("Cannot retrieve stats, is the docker on ?");
-        }
+        DockerStats dockerStats = new DockerStats();
+        dockerStats = dcontroller.parseDockerStatsResponse(dockerStats, resp);
+        dockerStats = dcontroller.parseDockerInspectResponse(dockerStats, respInspect);
         return ResponseEntity.ok().headers(headers).body(dockerStats);
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.util.SocketUtils;
 
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.utils.docker.DockerStats;
 import fr.codechill.spring.utils.rest.CustomRestTemplate;
 
 @Component
@@ -96,11 +97,11 @@ public class DockerController {
         return res;
     }
 
-    public ResponseEntity<?> dockerAction(String id, String action) {
+    public ResponseEntity<?> dockerAction(String id, String action, HttpMethod method) {
         String dockerActionUrl = BASE_URL + "/containers/" + id + "/" + action;
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<Object> entity = new HttpEntity<Object>(headers);
-        ResponseEntity<String> res = this.customRestTemplate.exchange(dockerActionUrl, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> res = this.customRestTemplate.exchange(dockerActionUrl, method, entity, String.class);
         logger.info("" + action + "ing docker " + id + " with status code : " + res.getStatusCodeValue());
         return res;
     }
@@ -112,5 +113,37 @@ public class DockerController {
         ResponseEntity<String> res = this.customRestTemplate.exchange(dockerActionUrl, HttpMethod.GET, entity, String.class);
         logger.info("Get stats for docker " + id + " with status code : " + res.getStatusCodeValue());
         return res;
+    }
+
+    public DockerStats parseDockerStatsResponse(DockerStats dockerStats, ResponseEntity<?> resp) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode jsonDocker = mapper.readTree(resp.getBody().toString());
+            dockerStats.setDockerId(jsonDocker.get("id").asText());
+            dockerStats.setName(jsonDocker.get("name").asText());
+            dockerStats.setMemoryLimit(jsonDocker.get("memory_stats").get("limit").asDouble() / 1000000);
+            dockerStats.setMemoryUsage(jsonDocker.get("memory_stats").get("usage").asDouble() / 1000000);
+            Long total_usage = jsonDocker.get("cpu_stats").get("cpu_usage").get("total_usage").asLong();
+            Long system_cpu_usage = jsonDocker.get("cpu_stats").get("system_cpu_usage").asLong();
+            dockerStats.setCpuPercent((double) (total_usage / system_cpu_usage) * 100);
+        }
+        catch (Exception e) {
+            logger.info("Cannot retrieve all stats, is the docker on ?");
+        }
+        return dockerStats;
+    }
+
+    public DockerStats parseDockerInspectResponse(DockerStats dockerStats, ResponseEntity<?> resp) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode jsonDocker = mapper.readTree(resp.getBody().toString());
+            dockerStats.setCreated(jsonDocker.get("Created").asText());
+            dockerStats.setImage(jsonDocker.get("Config").get("Image").asText());
+            dockerStats.setStatus(jsonDocker.get("State").get("Status").asText());
+        }
+        catch (Exception e) {
+            logger.info("Cannot retrieve all infos, is the docker on ?");
+        }
+        return dockerStats;
     }
 }

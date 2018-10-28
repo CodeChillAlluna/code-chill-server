@@ -10,6 +10,9 @@ public class DockerStats implements Serializable {
     private Double memoryLimit;
     private Double memoryUsage;
     private Double cpuPercent;
+    private String created;
+    private String image;
+    private String status;
 
     public DockerStats() {
         this.dockerId = "";
@@ -17,6 +20,9 @@ public class DockerStats implements Serializable {
         this.memoryLimit = 0.0d;
         this.memoryUsage = 0.0d;
         this.cpuPercent = 0.0d;
+        this.created = "";
+        this.image = "";
+        this.status = "";
     }
 
     public String getDockerId() {
@@ -49,7 +55,7 @@ public class DockerStats implements Serializable {
 
     public void setMemoryUsage(Double memoryUsage) {
         this.memoryUsage = memoryUsage;
-    }    
+    }
 
     public Double getCpuPercent() {
         return this.cpuPercent;
@@ -59,15 +65,28 @@ public class DockerStats implements Serializable {
         this.cpuPercent = cpuPercent;
     }
 
-    @Override
-    public String toString() {
-        return "{" +
-            " dockerId='" + getDockerId() + "'" +
-            ", name='" + getName() + "'" +
-            ", memoryLimit='" + getMemoryLimit() + "'" +
-            ", memoryUsage='" + getMemoryUsage() + "'" +
-            ", cpuPercent='" + getCpuPercent() + "'" +
-            "}";
+    public String getCreated() {
+        return this.created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    public String getImage() {
+        return this.image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
@@ -78,15 +97,26 @@ public class DockerStats implements Serializable {
             return false;
         }
         DockerStats dockerStats = (DockerStats) o;
-        return Objects.equals(dockerId, dockerStats.dockerId) &&
-            Objects.equals(name, dockerStats.name) &&
-            Objects.equals(memoryLimit, dockerStats.memoryLimit) &&
-            Objects.equals(memoryUsage, dockerStats.memoryUsage) &&
-            Objects.equals(cpuPercent, dockerStats.cpuPercent);
+        return Objects.equals(dockerId, dockerStats.dockerId) && Objects.equals(name, dockerStats.name) && Objects.equals(memoryLimit, dockerStats.memoryLimit) && Objects.equals(memoryUsage, dockerStats.memoryUsage) && Objects.equals(cpuPercent, dockerStats.cpuPercent) && Objects.equals(created, dockerStats.created) && Objects.equals(image, dockerStats.image) && Objects.equals(status, dockerStats.status);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dockerId, name, memoryLimit, memoryUsage, cpuPercent);
+        return Objects.hash(dockerId, name, memoryLimit, memoryUsage, cpuPercent, created, image, status);
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+            " dockerId='" + getDockerId() + "'" +
+            ", name='" + getName() + "'" +
+            ", memoryLimit='" + getMemoryLimit() + "'" +
+            ", memoryUsage='" + getMemoryUsage() + "'" +
+            ", cpuPercent='" + getCpuPercent() + "'" +
+            ", created='" + getCreated() + "'" +
+            ", image='" + getImage() + "'" +
+            ", status='" + getStatus() + "'" +
+            "}";
+    }
+
 }

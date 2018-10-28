@@ -6,7 +6,8 @@ public enum DockerActions {
     STOP ("stop"),
     PAUSE ("pause"),
     RESUME ("unpause"),
-    STATS ("stats");
+    STATS ("stats"),
+    INSPECT ("json");
         
     private String action;
         

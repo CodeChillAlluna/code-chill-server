@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import fr.codechill.spring.controller.DockerController;
@@ -35,7 +36,7 @@ public class DockerControllerTest {
     @Test
     public void bDockerActionTest () {
         String action = DockerActions.START.toString();
-        assertEquals(this.dockerController.dockerAction(dockerId, action).getStatusCodeValue(), 204);
+        assertEquals(this.dockerController.dockerAction(dockerId, action, HttpMethod.POST).getStatusCodeValue(), 204);
     }
 
     @Test
@@ -46,7 +47,7 @@ public class DockerControllerTest {
     @Test
     public void eDeleteDockerTest () {
         String action = DockerActions.STOP.toString();
-        this.dockerController.dockerAction(dockerId, action);
+        this.dockerController.dockerAction(dockerId, action, HttpMethod.POST);
         assertEquals(this.dockerController.deleteDocker(dockerId).getStatusCodeValue(), 204);
     }
 }
