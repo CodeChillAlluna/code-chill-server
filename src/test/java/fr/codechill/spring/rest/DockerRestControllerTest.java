@@ -140,7 +140,17 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void hDeleteDockerTest() throws Exception {
+    public void hDockerStatsNoStatsTest() throws Exception {
+        try {
+            this.mock.perform(get("/containers/" + dockerId + "/stats")
+            .header("Authorization", "Bearer " + jwtToken)
+            .contentType(MediaType.APPLICATION_JSON));
+            // Assert.fail();
+        } catch (Exception expected) {}
+    }
+
+    @Test
+    public void iDeleteDockerTest() throws Exception {
         this.mock.perform(delete("/containers/" + dockerId)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -148,7 +158,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void iDeleteDockerIncorrectIdTest() throws Exception {
+    public void jDeleteDockerIncorrectIdTest() throws Exception {
         this.mock.perform(delete("/containers/" + 500)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
@@ -156,7 +166,7 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void jDockerStatsInvalidTest() throws Exception {
+    public void kDockerStatsInvalidTest() throws Exception {
         this.mock.perform(get("/containers/" + 500 + "/stats")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
