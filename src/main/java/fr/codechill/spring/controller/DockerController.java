@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,15 +17,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SocketUtils;
-import org.springframework.web.client.RestTemplate;
 
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.utils.rest.CustomRestTemplate;
 
 @Component
 public class DockerController {
 
     private final DockerRepository drepo;
+
+    @Autowired
+    private CustomRestTemplate customRestTemplate;
 
     @Value("${app.dockerurl}")
     private String BASE_URL;
@@ -43,7 +47,6 @@ public class DockerController {
 
     public Docker createDocker() {
         String dockerCreatetUrl = BASE_URL + "/containers/create";
-        RestTemplate restTemplate = new RestTemplate();
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
         body.put("Image", "theiaide/theia-full:next");
@@ -72,7 +75,7 @@ public class DockerController {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(body.toString(), headers);
 
-        ResponseEntity<String> res = restTemplate.exchange(dockerCreatetUrl, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> res = this.customRestTemplate.exchange(dockerCreatetUrl, HttpMethod.POST, entity, String.class);
         Docker docker;
         try {
             JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
@@ -85,31 +88,28 @@ public class DockerController {
     }
 
     public ResponseEntity<?> deleteDocker(String id) {
-        String dockerDeleteUrl = BASE_URL + "/containers/" + id;
-        RestTemplate restTemplate = new RestTemplate();   
+        String dockerDeleteUrl = BASE_URL + "/containers/" + id;  
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<Object> entity = new HttpEntity<Object>(headers);
-        ResponseEntity<String> res = restTemplate.exchange(dockerDeleteUrl, HttpMethod.DELETE, entity, String.class);
+        ResponseEntity<String> res = this.customRestTemplate.exchange(dockerDeleteUrl, HttpMethod.DELETE, entity, String.class);
         logger.info("Deleting docker " + id + " : " + res.getBody());
         return res;
     }
 
     public ResponseEntity<?> dockerAction(String id, String action) {
         String dockerActionUrl = BASE_URL + "/containers/" + id + "/" + action;
-        RestTemplate restTemplate = new RestTemplate();   
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<Object> entity = new HttpEntity<Object>(headers);
-        ResponseEntity<String> res = restTemplate.exchange(dockerActionUrl, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> res = this.customRestTemplate.exchange(dockerActionUrl, HttpMethod.POST, entity, String.class);
         logger.info("" + action + "ing docker " + id + " with status code : " + res.getStatusCodeValue());
         return res;
     }
 
     public ResponseEntity<?> getDockerStats(String id) {
-        String dockerActionUrl = BASE_URL + "/containers/" + id + "/" + "/stats?stream=False";
-        RestTemplate restTemplate = new RestTemplate();   
+        String dockerActionUrl = BASE_URL + "/containers/" + id + "/" + "/stats?stream=False"; 
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<Object> entity = new HttpEntity<Object>(headers);
-        ResponseEntity<String> res = restTemplate.exchange(dockerActionUrl, HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> res = this.customRestTemplate.exchange(dockerActionUrl, HttpMethod.GET, entity, String.class);
         logger.info("Get stats for docker " + id + " with status code : " + res.getStatusCodeValue());
         return res;
     }

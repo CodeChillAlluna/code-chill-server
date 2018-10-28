@@ -43,11 +43,6 @@ public class DockerControllerTest {
         assertEquals(this.dockerController.getDockerStats(dockerId).getStatusCodeValue(), 200);
     }
 
-    /* @Test
-    public void dDockerStatsInvalidTest () {
-        assertEquals(this.dockerController.getDockerStats("1").getStatusCodeValue(), 404);
-    } */
-
     @Test
     public void eDeleteDockerTest () {
         String action = DockerActions.STOP.toString();

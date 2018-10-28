@@ -155,12 +155,12 @@ public class DockerRestControllerTest{
             .andExpect(status().is4xxClientError());
     }
 
-    /*@Test
+    @Test
     public void jDockerStatsInvalidTest() throws Exception {
         this.mock.perform(get("/containers/" + 500 + "/stats")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is4xxClientError());
-    }*/
+    }
 
 }
