@@ -11,7 +11,7 @@ public class RestErrorHandler implements ResponseErrorHandler {
 
     @Override
     public void handleError(ClientHttpResponse response) throws IOException {
-        return;
+        // Do nothing, no matter the status we just want to return the ResponseEntity
     }
  
     @Override

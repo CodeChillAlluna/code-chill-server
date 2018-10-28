@@ -145,7 +145,6 @@ public class DockerRestControllerTest{
             this.mock.perform(get("/containers/" + dockerId + "/stats")
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON));
-            // Assert.fail();
         } catch (Exception expected) {}
     }
 
