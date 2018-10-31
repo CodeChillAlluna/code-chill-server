@@ -108,6 +108,7 @@ public class DockerRestController {
         ResponseEntity<?> res = dcontroller.deleteDocker(docker.getName());
         if (res.getStatusCode().is2xxSuccessful()) {
             user.deleteDocker(docker);
+            this.urepo.save(user);
         }
         return res;
     }

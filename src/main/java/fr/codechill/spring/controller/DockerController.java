@@ -50,7 +50,7 @@ public class DockerController {
         String dockerCreatetUrl = BASE_URL + "/containers/create";
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
-        body.put("Image", "theiaide/theia-full:next");
+        body.put("Image", "codechillaluna/code-chill-ide");
         body.put("Hostname", "chill");
         body.put("tty", true);
         body.put("OpenStdin", true);
@@ -123,9 +123,13 @@ public class DockerController {
             dockerStats.setName(jsonDocker.get("name").asText());
             dockerStats.setMemoryLimit(jsonDocker.get("memory_stats").get("limit").asDouble() / 1000000);
             dockerStats.setMemoryUsage(jsonDocker.get("memory_stats").get("usage").asDouble() / 1000000);
-            Long total_usage = jsonDocker.get("cpu_stats").get("cpu_usage").get("total_usage").asLong();
-            Long system_cpu_usage = jsonDocker.get("cpu_stats").get("system_cpu_usage").asLong();
-            dockerStats.setCpuPercent((double) (total_usage / system_cpu_usage) * 100);
+            double total_usage = jsonDocker.get("cpu_stats").get("cpu_usage").get("total_usage").asDouble();
+            double system_cpu_usage = jsonDocker.get("cpu_stats").get("system_cpu_usage").asDouble();
+            double pre_total_usage = jsonDocker.get("precpu_stats").get("cpu_usage").get("total_usage").asDouble();
+            double pre_system_cpu_usage = jsonDocker.get("precpu_stats").get("system_cpu_usage").asDouble();
+            double usage = total_usage - pre_total_usage;
+            double system_usage = system_cpu_usage - pre_system_cpu_usage;
+            dockerStats.setCpuPercent((usage / system_usage) * 100);
         }
         catch (Exception e) {
             logger.info("Cannot retrieve all stats, is the docker on ?");
