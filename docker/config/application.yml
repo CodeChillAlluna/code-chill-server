@@ -50,7 +50,7 @@ logging:
     ROOT: INFO
 
 app:
-  dockerurl: http://localhost:2375
+  dockerurl: http://192.168.1.98:2375
   clienturl: http://localhost:3000
 
 #logging:
