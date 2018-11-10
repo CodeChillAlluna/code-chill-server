@@ -56,16 +56,12 @@ public class AuthenticationRestController {
             return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
         }
 
-        try {
-            // Reload password post-security so we can generate token
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-            final String token = jwtTokenUtil.generateToken(userDetails, device);
+        // Reload password post-security so we can generate token
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        final String token = jwtTokenUtil.generateToken(userDetails, device);
 
-            // Return the token
-            return ResponseEntity.ok(new JwtAuthenticationResponse(token, "Connection successful!"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
-        }
+        // Return the token
+        return ResponseEntity.ok(new JwtAuthenticationResponse(token, "Connection successful!"));
     }
 
     @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)

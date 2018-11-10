@@ -129,11 +129,18 @@ public class AuthenticationRestControllerTest {
                 .header("Authorization", "Bearer 5d1103e-b3e1-4ae9-b606-46c9c1bc915a"))
                 .andExpect(status().is2xxSuccessful());
     }
-
+    
     @Test
     public void testRefreshWrongToken() throws Exception {
         this.mvc.perform(get("/refresh")
                 .header("Authorization", "Bearer cjeoenvoeve"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void testRefreshOldToken() throws Exception {
+        this.mvc.perform(get("/refresh")
+                .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMdWx1MzAwIiwiYXVkIjoid2ViIiwiZXhwIjoxNTQyNDczNzQ0LCJpYXQiOjE1NDE4Njg5NDR9.McH8Rla0RU5z1V-OPYGpriPVZ_Xne0x8IbmBeSngjR5Wyd6pZuVeb5UvofH8XN8PgphGfJHG3bB1jVCgv4Zr_Q"))
                 .andExpect(status().is4xxClientError());
     }
 
