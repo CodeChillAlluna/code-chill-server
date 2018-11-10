@@ -141,11 +141,9 @@ public class DockerRestController {
         dockerStats = dcontroller.parseDockerStatsResponse(dockerStats, resp);
         dockerStats = dcontroller.parseDockerInspectResponse(dockerStats, respInspect);
         Docker docker = drepo.findOne(id);
-        if (docker != null) {
-            if (!docker.getName().equals(dockerStats.getName())) {
-                docker.setName(dockerStats.getName());
-                this.drepo.save(docker);
-            }
+        if (docker != null && !docker.getName().equals(dockerStats.getName())) {
+            docker.setName(dockerStats.getName());
+            this.drepo.save(docker);
         }
         return ResponseEntity.ok().headers(headers).body(dockerStats);
     }
