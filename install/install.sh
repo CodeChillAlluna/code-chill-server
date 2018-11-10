@@ -57,20 +57,21 @@ docker_install () {
   StartLimitInterval=60s\n
   [Install]
   WantedBy=multi-user.target" > /lib/systemd/system/docker.service
-  systemctl daemon-reload
-  systemctl restart docker
+  sudo systemctl daemon-reload
+  sudo service docker restart
   export DOCKER_HOST=tcp://localhost:2375
   if ! grep -qF "DOCKER_HOST=tcp://localhost:2375" /etc/environment
   then
     echo "DOCKER_HOST=tcp://localhost:2375" >> /etc/environment
   fi
   source /etc/environment
-  systemctl restart docker
+  sudo service docker restart
   sudo apt-get install docker-compose -y
 }
 
 dockerfiles () {
   # Installation of docker 
+  echo "DOCKERFILES"
   docker pull codechillaluna/code-chill-ide
 }
 

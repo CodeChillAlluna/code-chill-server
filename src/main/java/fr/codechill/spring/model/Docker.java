@@ -24,6 +24,8 @@ public class Docker implements Serializable {
 
     private String name;
 
+    private String containerId;
+
     private int port;
     
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "dockers")
@@ -37,9 +39,10 @@ public class Docker implements Serializable {
 
     private Docker() {}
 
-    public Docker(String name, int port) {
-        this.name = name;
+    public Docker(String containerId, int port) {
+        this.containerId = containerId;
         this.port = port;
+        this.name = "";
     }
 
     public Long getId() {
@@ -52,6 +55,10 @@ public class Docker implements Serializable {
 
     public int getPort() {
         return this.port;
+    }
+
+    public String getContainerId() {
+        return this.containerId;
     }
 
     public List<User> getUsers() {
@@ -68,5 +75,13 @@ public class Docker implements Serializable {
 
     public void setLanguages(List<Language> l) {
         this.languages = l;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setContainerId(String containerId) {
+        this.containerId = containerId;
     }
 }
