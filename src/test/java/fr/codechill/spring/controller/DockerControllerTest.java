@@ -29,7 +29,7 @@ public class DockerControllerTest {
     @Test
     public void aCreateDockerTest() {
         Docker docker = this.dockerController.createDocker();
-        dockerId = docker.getName();
+        dockerId = docker.getContainerId();
         assertNotNull(docker);
     }
 

@@ -21,6 +21,7 @@ public class DockerTest {
     private Long id;
     private User userDummy1;
     private String name;
+    private String containerId;
     private Language language;
     private List<User> users = new ArrayList<>();
     private List<Language> languages = new ArrayList<>();
@@ -29,6 +30,7 @@ public class DockerTest {
     public void setUp() {
         this.id = 12345L;
         this.name = "testDocker";
+        this.containerId = "containerId";
         this.language = new Language ("Java");
         this.languages.add(language);
         this.users.add(userDummy1);
@@ -37,7 +39,7 @@ public class DockerTest {
     @Test
     public void testSetUsers() {
         this.users.clear();
-        Docker dockTest = new Docker(this.name, 1);
+        Docker dockTest = new Docker(this.containerId, 1);
         this.users.add(this.userDummy1);
         dockTest.setUsers(this.users);
         assertNotNull(dockTest.getUsers());
@@ -45,13 +47,14 @@ public class DockerTest {
 
     @Test
     public void testGetLanguages() {
-        Docker dockTest = new Docker (this.name, 1);
+        Docker dockTest = new Docker(this.containerId, 1);
         dockTest.setLanguages(this.languages);
         assertNotNull(dockTest.getLanguages());
     }
     @Test
     public void testGetName() {
-        Docker dockTest = new Docker (this.name, 1);
+        Docker dockTest = new Docker(this.containerId, 1);
+        dockTest.setName(this.name);
         assertEquals(this.name, dockTest.getName());
     }
 
@@ -60,6 +63,12 @@ public class DockerTest {
         Docker dockTest = new Docker(this.name, 1);
         dockTest.setUsers(this.users);
         assertNotNull(dockTest.getUsers());
+    }
+
+    @Test
+    public void testGetContainerId() {
+        Docker dockTest = new Docker(this.containerId, 1);
+        assertEquals(this.containerId, dockTest.getContainerId());
     }
 
 }

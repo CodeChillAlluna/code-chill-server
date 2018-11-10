@@ -1,6 +1,5 @@
 package fr.codechill.spring.rest;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -55,16 +54,16 @@ public class DockerRestController {
             ObjectMapper mapper = new ObjectMapper();
             HttpHeaders headers = new HttpHeaders();
             ObjectNode body = mapper.createObjectNode();
-            body.put("Message", "The docker with id " + dockerId + " doesn't exist or you don't own it!");
+            body.put("message", "The docker with id " + dockerId + " doesn't exist or you don't own it!");
             return ResponseEntity.badRequest().headers(headers).body(body);
         }
         if (action.equals(DockerActions.STATS))
-            return dcontroller.getDockerStats(docker.getName());
+            return dcontroller.getDockerStats(docker.getContainerId());
         ResponseEntity<?> res;
         if (action.equals(DockerActions.INSPECT))
-            res = dcontroller.dockerAction(docker.getName(), action.toString(), HttpMethod.GET);
+            res = dcontroller.dockerAction(docker.getContainerId(), action.toString(), HttpMethod.GET);
         else
-            res = dcontroller.dockerAction(docker.getName(), action.toString(), HttpMethod.POST);
+            res = dcontroller.dockerAction(docker.getContainerId(), action.toString(), HttpMethod.POST);
         return res;
     }
 
@@ -102,10 +101,10 @@ public class DockerRestController {
             ObjectMapper mapper = new ObjectMapper();
             HttpHeaders headers = new HttpHeaders();
             ObjectNode body = mapper.createObjectNode();
-            body.put("Message", "The docker with id " + id + " doesn't exist or you don't own it!");
+            body.put("message", "The docker with id " + id + " doesn't exist or you don't own it!");
             return ResponseEntity.badRequest().headers(headers).body(body);
         }
-        ResponseEntity<?> res = dcontroller.deleteDocker(docker.getName());
+        ResponseEntity<?> res = dcontroller.deleteDocker(docker.getContainerId());
         if (res.getStatusCode().is2xxSuccessful()) {
             user.deleteDocker(docker);
             this.urepo.save(user);
@@ -120,7 +119,7 @@ public class DockerRestController {
         if (docker == null) {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode body = mapper.createObjectNode();
-            body.put("Message", "Something went wrong while creating a container");
+            body.put("message", "Something went wrong while creating a container");
             return ResponseEntity.badRequest().headers(headers).body(body);
         }
         String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
@@ -141,6 +140,13 @@ public class DockerRestController {
         DockerStats dockerStats = new DockerStats();
         dockerStats = dcontroller.parseDockerStatsResponse(dockerStats, resp);
         dockerStats = dcontroller.parseDockerInspectResponse(dockerStats, respInspect);
+        Docker docker = drepo.findOne(id);
+        if (docker != null) {
+            if (!docker.getName().equals(dockerStats.getName())) {
+                docker.setName(dockerStats.getName());
+                this.drepo.save(docker);
+            }
+        }
         return ResponseEntity.ok().headers(headers).body(dockerStats);
     }
 }
