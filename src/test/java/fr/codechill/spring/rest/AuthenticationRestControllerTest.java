@@ -131,6 +131,13 @@ public class AuthenticationRestControllerTest {
     }
 
     @Test
+    public void testRefreshWrongToken() throws Exception {
+        this.mvc.perform(get("/refresh")
+                .header("Authorization", "Bearer cjeoenvoeve"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     @WithAnonymousUser
     public void shouldGetUnauthorizedWithAnonymousUser() throws Exception {
 
