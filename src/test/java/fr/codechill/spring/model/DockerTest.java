@@ -71,4 +71,11 @@ public class DockerTest {
         assertEquals(this.containerId, dockTest.getContainerId());
     }
 
+    @Test
+    public void testSetContainerId() {
+        Docker dockTest = new Docker("Old Id", 1);
+        dockTest.setContainerId(this.containerId);
+        assertEquals(this.containerId, dockTest.getContainerId());
+    }
+
 }
