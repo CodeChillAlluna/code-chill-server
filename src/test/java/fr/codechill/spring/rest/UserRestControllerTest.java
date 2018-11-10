@@ -67,7 +67,15 @@ public class UserRestControllerTest {
         this.mvc.perform(get("/user")
             .header("Authorization", "Bearer cebiebobvezfz")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void testGetProfileWrongToken2() throws Exception {
+        this.mvc.perform(get("/user")
+            .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMdWx1MzAwIiwiYXVkIjoid2ViIiwiZXhwIjoxNTQyNDczNzQ0LCJpYXQiOjE1NDE4Njg5NDR9.McH8Rla0RU5z1V-OPYGpriPVZ_Xne0x8IbmBeSngjR5Wyd6pZuVeb5UvofH8XN8PgphGfJHG3bB1jVCgv4Zr_Q")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
     }
 
     @Test
