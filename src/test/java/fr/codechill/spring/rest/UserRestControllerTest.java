@@ -1,5 +1,17 @@
 package fr.codechill.spring.rest;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.http.MediaType;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,23 +24,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import fr.codechill.spring.model.security.AuthorityName;
-import fr.codechill.spring.model.User;
 import fr.codechill.spring.security.JwtTokenUtil;
 import fr.codechill.spring.security.JwtUser;
 import fr.codechill.spring.security.JwtUserFactory;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -58,6 +60,22 @@ public class UserRestControllerTest {
 
         this.mvc.perform(get("/user"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void testGetProfileWrongToken() throws Exception {
+        this.mvc.perform(get("/user")
+            .header("Authorization", "Bearer cebiebobvezfz")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void testGetProfileWrongToken2() throws Exception {
+        this.mvc.perform(get("/user")
+            .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJMdWx1MzAwIiwiYXVkIjoid2ViIiwiZXhwIjoxNTQyNDczNzQ0LCJpYXQiOjE1NDE4Njg5NDR9.McH8Rla0RU5z1V-OPYGpriPVZ_Xne0x8IbmBeSngjR5Wyd6pZuVeb5UvofH8XN8PgphGfJHG3bB1jVCgv4Zr_Q")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
     }
 
     @Test

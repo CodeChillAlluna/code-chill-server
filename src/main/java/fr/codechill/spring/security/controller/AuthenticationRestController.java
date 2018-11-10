@@ -1,8 +1,7 @@
 package fr.codechill.spring.security.controller;
 
-import fr.codechill.spring.security.JwtAuthenticationRequest;
-import fr.codechill.spring.security.JwtTokenUtil;
-import fr.codechill.spring.security.JwtUser;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +13,16 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import fr.codechill.spring.security.service.JwtAuthenticationResponse;
 
-import javax.servlet.http.HttpServletRequest;
+import fr.codechill.spring.security.JwtAuthenticationRequest;
+import fr.codechill.spring.security.JwtTokenUtil;
+import fr.codechill.spring.security.JwtUser;
+import fr.codechill.spring.security.service.JwtAuthenticationResponse;
 
 @RestController
 @CrossOrigin(origins = {"${app.clienturl}"})
@@ -42,21 +43,25 @@ public class AuthenticationRestController {
     @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest, Device device) throws AuthenticationException {
 
-        // Perform the security
-        final Authentication authentication = authenticationManager.authenticate(
+        try {
+            // Perform the security
+            final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authenticationRequest.getUsername(),
                         authenticationRequest.getPassword()
                 )
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
 
         // Reload password post-security so we can generate token
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails, device);
 
         // Return the token
-        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+        return ResponseEntity.ok(new JwtAuthenticationResponse(token, "Connection successful!"));
     }
 
     @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)
@@ -64,13 +69,18 @@ public class AuthenticationRestController {
         String authToken = request.getHeader(tokenHeader);
         final String token = authToken.substring(7);
         String username = jwtTokenUtil.getUsernameFromToken(token);
-        JwtUser user = (JwtUser) userDetailsService.loadUserByUsername(username);
+        JwtUser user;
+        try {
+            user = (JwtUser) userDetailsService.loadUserByUsername(username);
+        } catch(Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
 
         if (jwtTokenUtil.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
             String refreshedToken = jwtTokenUtil.refreshToken(token);
-            return ResponseEntity.ok(new JwtAuthenticationResponse(refreshedToken));
+            return ResponseEntity.ok(new JwtAuthenticationResponse(refreshedToken, "Successfully renew your connection!"));
         } else {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body("{\"message\": \"Your token cannot be refresh!\"}");
         }
     }
 

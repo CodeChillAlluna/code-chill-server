@@ -181,6 +181,18 @@ public class UserControllerTest{
     }
 
     @Test
+    public void testAuthWrongUser() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode body = mapper.createObjectNode();
+        body.put("username", "azerty");
+        body.put("password", "azerty");
+        this.mock.perform(post("/auth")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(asJsonString(body)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testGetUser() throws Exception {
         this.mock.perform(get("/user/1")
             .header("Authorization", "Bearer " + this.jwtToken)
