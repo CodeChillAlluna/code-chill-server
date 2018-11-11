@@ -97,7 +97,7 @@ public class UserController {
         }
         else
         {
-            body.put("message","the user your trying to delete doesn't seems to exist :shrug");
+            body.put("message","the user your trying to delete doesn't seems to exist");
             return ResponseEntity.badRequest().headers(headers).body(body);
         }
     }
@@ -139,7 +139,7 @@ public class UserController {
             this.urepo.save(updatedUser);
             return ResponseEntity.ok().headers(headers).body(body);         
         }
-        body.put("message","the user your trying to edit doesn't seem to exist :shrug");
+        body.put("message","the user your trying to edit doesn't seem to exist ");
         return ResponseEntity.badRequest().headers(headers).body(body);
     }
 
