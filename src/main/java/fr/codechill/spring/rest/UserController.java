@@ -275,13 +275,31 @@ public class UserController {
     private ObjectNode constructJsonUser(User user) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode jsonUser = mapper.createObjectNode();
-        jsonUser.put("ID",user.getId());
-        jsonUser.put("Username",user.getUsername());
-        jsonUser.put("Password",user.getPassword());
-        jsonUser.put("Firstname",user.getFirstname());
-        jsonUser.put("Lastname",user.getLastname());
+        jsonUser.put("id",user.getId());
+        jsonUser.put("username",user.getUsername());
+        jsonUser.put("password",user.getPassword());
+        jsonUser.put("firstname",user.getFirstname());
+        jsonUser.put("lastname",user.getLastname());
         jsonUser.put("email",user.getEmail());
+        logger.info("number of dockers for the current user : "+user.getDockers().size());
+        jsonUser.set("dockers",this.constructJsonDockerUser(user));
         logger.info("constructed user : " + jsonUser.toString());
         return jsonUser;
+    }
+
+    private ObjectNode constructJsonDockerUser(User user) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode jsonDocker = mapper.createObjectNode();
+        for (Docker docker : user.getDockers()) {
+            ObjectNode currentDocker = mapper.createObjectNode();
+            currentDocker.put("id",docker.getId());
+            currentDocker.put("name",docker.getName());
+            currentDocker.put("containerId",docker.getContainerId());
+            currentDocker.put("port",docker.getPort());
+            jsonDocker.set("docker " + docker.getName(),currentDocker);
+        }
+        logger.info("constructed dockers json : " + jsonDocker.toString());
+        return jsonDocker;
+
     }
 }
