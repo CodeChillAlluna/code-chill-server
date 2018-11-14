@@ -151,6 +151,21 @@ public class UserControllerTest{
     }
 
     @Test
+    public void testGetUserWrongToken() throws Exception {
+        this.mock.perform(get("/user/1000000000")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void testDeleteUserWrongToken() throws Exception {
+        this.mock.perform(get("/user")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhcXd4c3plZGMiLCJhdWQiOiJ3ZWIiLCJleHAiOjE1NDI4MTYyMTAsImlhdCI6MTU0MjIxMTQxMH0.LGnNDHxlgI4Si09-d8hpsPGfhI6a3suviF5uOjTrdPp5ODJSYv47Jez4hafz_uABg7FwhkaRCsHe9JbEYSpYwA"))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     public void testAddUserUsername() throws Exception {
         this.testUser.setUsername("dummy");
         this.mock.perform(post("/user")
