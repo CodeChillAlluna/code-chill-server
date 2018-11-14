@@ -1,10 +1,15 @@
 package fr.codechill.spring.rest;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,20 +31,25 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.exception.BadRequestException;
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.User;
+import fr.codechill.spring.model.security.Authority;
+import fr.codechill.spring.model.security.AuthorityName;
+import fr.codechill.spring.repository.AuthorityRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
+import fr.codechill.spring.security.JwtUser;
+import fr.codechill.spring.security.JwtUserFactory;
 
 @CrossOrigin(origins = {"${app.clienturl}"})
 @RestController
 public class UserController {
     private final UserRepository urepo;
+
+    private final AuthorityRepository arepo;
+
     @Value("${spring.mail.username}")
     private String SENDFROM;
 
@@ -60,8 +70,9 @@ public class UserController {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public UserController(UserRepository urepo) {
+    public UserController(UserRepository urepo, AuthorityRepository arepo) {
         this.urepo = urepo;
+        this.arepo = arepo;
     }
 
     @GetMapping("/user/{id}")
@@ -73,7 +84,9 @@ public class UserController {
         if (this.urepo.findOne(id)!=null)
         {
             User user = this.urepo.findOne(id);
-            body.set("user",this.constructJsonUser(user));
+            JwtUser jwtUser = JwtUserFactory.create(user);
+            body.putPOJO("user", jwtUser);
+            body.put("message", "Successfully geting user info");
             return ResponseEntity.ok().headers(new HttpHeaders()).body(body);
         }
         body.put("message","no user found");
@@ -114,7 +127,8 @@ public class UserController {
             logger.info("updating user lastname with : "+updatedUser.getLastname());
             updatedUser.setLastname(user.getLastname());
             body.put("message","user's lastname updated");
-            body.set("user",this.constructJsonUser(user));
+            JwtUser jwtUser = JwtUserFactory.create(user);
+            body.putPOJO("user", jwtUser);
             logger.info("body "+ body.toString());
             this.urepo.save(updatedUser);
             return ResponseEntity.ok().headers(headers).body(body);
@@ -124,7 +138,8 @@ public class UserController {
             logger.info("updating user lastname with : "+updatedUser.getFirstname());
             updatedUser.setFirstname(user.getFirstname());
             body.put("message","user's firstname updated");
-            body.set("user",this.constructJsonUser(user));
+            JwtUser jwtUser = JwtUserFactory.create(user);
+            body.putPOJO("user", jwtUser);
             this.urepo.save(updatedUser);
             return ResponseEntity.ok().headers(headers).body(body);
             
@@ -135,7 +150,8 @@ public class UserController {
             logger.info("updating user email with : "+ updatedUser.getEmail());
             updateUserEmail(updatedUser.getEmail());
             body.put("message","user's email updated");
-            body.set("user",this.constructJsonUser(user));
+            JwtUser jwtUser = JwtUserFactory.create(user);
+            body.putPOJO("user", jwtUser);
             this.urepo.save(updatedUser);
             return ResponseEntity.ok().headers(headers).body(body);         
         }
@@ -150,22 +166,28 @@ public class UserController {
         HttpHeaders responseHeaders = new HttpHeaders();
         if (urepo.findByUsername(user.getUsername()) != null) {
             logger.info("An account with this username already exist ");
-            body.put("message","An account with this username already exist,returning a bad request");
+            body.put("message", "An account with this username already exist,returning a bad request");
             return ResponseEntity.badRequest().headers(responseHeaders).body(body);
         }
         if (urepo.findByEmail(user.getEmail()) != null) {
             logger.info("An account with this email already exist,returning a bad request");
-            body.put("message","An account with this email already exist!");
+            body.put("message", "An account with this email already exist!");
             return ResponseEntity.badRequest().headers(responseHeaders).body(body);
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         Docker docker = this.dcontroller.createDocker();
         user.addDocker(docker);
+        Authority authority = arepo.findByName(AuthorityName.ROLE_USER);
+        List<Authority> authorities = new ArrayList<Authority>(1);
+        authorities.add(authority);
+        user.setAuthorities(authorities);
         urepo.save(user);
         final URI location = ServletUriComponentsBuilder
             .fromCurrentServletMapping().path("/user/{id}").build()
             .expand(user.getId()).toUri();
-        body.set("user",this.constructJsonUser(user));
+        JwtUser jwtUser = JwtUserFactory.create(user);
+        body.putPOJO("user", jwtUser);
+        body.put("message", "Your account have been sucessfully created !");
         return ResponseEntity.created(location).headers(responseHeaders).body(body);
     }
 
@@ -222,12 +244,13 @@ public class UserController {
             passwordResetEmail.setSubject("Password Reset Request");
             passwordResetEmail.setText("Reset link:\n" + BASE_URL + "/reset/" + user.getTokenPassword());
             mailSender.send(passwordResetEmail);
-            body.put("message","an email has been sent to reset the password");
-            body.set("user",this.constructJsonUser(user));
+            body.put("message", "An email has been sent to reset the password");
+            JwtUser jwtUser = JwtUserFactory.create(user);
+            body.putPOJO("user", jwtUser);
             return ResponseEntity.ok().headers(responseHeaders).body(body);
         }
         logger.info("No user email was found with this email");
-        body.put("message","No user email was found with this input");
+        body.put("message", "No user email was found with this input");
         return ResponseEntity.badRequest().headers(responseHeaders).body(body);  
     }
 
@@ -243,8 +266,9 @@ public class UserController {
         c.add(Calendar.DATE, 1);
         Date currentDatePlusOne = c.getTime();
         if(user != null && currentDate.after(user.getLastPasswordResetDate()) && currentDate.before(currentDatePlusOne)) {
-            body.put("message","the password has been reset");
-            body.set("user",this.constructJsonUser(user));
+            body.put("message", "Your password has been reset");
+            JwtUser jwtUser = JwtUserFactory.create(user);
+            body.putPOJO("user", jwtUser);
             return ResponseEntity.ok().headers(responseHeaders).body(body);
         }
         logger.info("Password reset failed due to an invalid token or an out dated one");
@@ -264,42 +288,12 @@ public class UserController {
             user.setTokenPassword(null);
             urepo.save(user);
             body.put("message","a new password has been set");
-            body.set("user",this.constructJsonUser(user));
+            JwtUser jwtUser = JwtUserFactory.create(user);
+            body.putPOJO("user", jwtUser);
             return ResponseEntity.ok().headers(responseHeaders).body(body);
         }
         logger.info("Setting of a new password due to an invalid token or an out dated one");
         body.put("message","Your token is invalid or hax expired");
         return ResponseEntity.badRequest().headers(responseHeaders).body(body);  
-    }
-
-    private ObjectNode constructJsonUser(User user) {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode jsonUser = mapper.createObjectNode();
-        jsonUser.put("id",user.getId());
-        jsonUser.put("username",user.getUsername());
-        jsonUser.put("password",user.getPassword());
-        jsonUser.put("firstname",user.getFirstname());
-        jsonUser.put("lastname",user.getLastname());
-        jsonUser.put("email",user.getEmail());
-        logger.info("number of dockers for the current user : "+user.getDockers().size());
-        jsonUser.set("dockers",this.constructJsonDockerUser(user));
-        logger.info("constructed user : " + jsonUser.toString());
-        return jsonUser;
-    }
-
-    private ObjectNode constructJsonDockerUser(User user) {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode jsonDocker = mapper.createObjectNode();
-        for (Docker docker : user.getDockers()) {
-            ObjectNode currentDocker = mapper.createObjectNode();
-            currentDocker.put("id",docker.getId());
-            currentDocker.put("name",docker.getName());
-            currentDocker.put("containerId",docker.getContainerId());
-            currentDocker.put("port",docker.getPort());
-            jsonDocker.set("docker " + docker.getName(),currentDocker);
-        }
-        logger.info("constructed dockers json : " + jsonDocker.toString());
-        return jsonDocker;
-
     }
 }
