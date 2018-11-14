@@ -151,14 +151,11 @@ public class DockerController {
     }
 
     public ResponseEntity <?> renameDocker(String containerId, String containerName) {
-        String dockerRenameUrl = BASE_URL + "/containers/"+containerId+"/rename";
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode body = mapper.createObjectNode();
-        body.put("name", containerName);
+        String dockerRenameUrl = BASE_URL + "/containers/" + containerId + "/rename?name=" + containerName;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<String>(body.toString(), headers);
+        HttpEntity<String> entity = new HttpEntity<String>(headers);
         ResponseEntity<String> res = this.customRestTemplate.exchange(dockerRenameUrl, HttpMethod.POST, entity, String.class);
-        return ResponseEntity.ok(body);
+        return res;
     }
 }
