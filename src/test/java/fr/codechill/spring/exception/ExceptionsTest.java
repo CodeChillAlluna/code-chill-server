@@ -1,5 +1,7 @@
 package fr.codechill.spring.exception;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +39,12 @@ public class ExceptionsTest {
     @Test(expected = UnauthorizedException.class)
     public void testUnauthorizedException() throws Exception {
         throw new UnauthorizedException("test");
+    }
+
+    @Test()
+    public void testExceptionRepresentation() throws Exception {
+        ExceptionRepresentation er = new ExceptionRepresentation("test");
+        assertEquals(er.getMessage(), "test");
     }
 
 }
