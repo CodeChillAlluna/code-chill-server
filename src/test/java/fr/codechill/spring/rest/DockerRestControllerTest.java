@@ -10,7 +10,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.util.*;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -28,6 +31,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.codechill.spring.CodeChillApplication;
+import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.User;
+import fr.codechill.spring.model.security.Authority;
+import fr.codechill.spring.model.security.AuthorityName;
+import fr.codechill.spring.repository.UserRepository;
+import fr.codechill.spring.utils.rest.CustomRestTemplate;
+
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes=CodeChillApplication.class)
@@ -38,11 +52,20 @@ public class DockerRestControllerTest{
 
     @Autowired
     private WebApplicationContext context;
-
+    
     private MockMvc mock;
     private static String jwtToken;
     private static Long dockerId;
     private ObjectMapper mapper;
+    private User testUser;
+    private String username = "Nathou";
+    private String password = "123456789";
+    private String firstname = "Nathan";
+    private String lastname = "Michanol";
+    private String email = "nathou@bonjour.com";
+    private Boolean enabled = true;
+    private Date lastPasswordResetDate = new Date(1993, 12, 12);
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     @Before
     public void setUp() {
@@ -52,9 +75,10 @@ public class DockerRestControllerTest{
             .build();
         this.mapper = new ObjectMapper();
         this.setJwtToken("dummy","admin");
+        this.testUser = setUpUser(username, password, firstname, lastname, email, enabled, lastPasswordResetDate);
     }
 
-    public void setJwtToken(String username,String password) {
+    public String setJwtToken(String username,String password) {
         ObjectNode body = this.mapper.createObjectNode();
         body.put("username", username);
         body.put("password", password);
@@ -65,15 +89,28 @@ public class DockerRestControllerTest{
             .andReturn().getResponse().getContentAsString();
             JsonNode jsonres = mapper.readValue(res, JsonNode.class);
             jwtToken = jsonres.get("token").textValue();
+            return jsonres.get("token").textValue();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public static String asJsonString(final Object obj) throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(obj);
     }
 
+    public User setUpUser(String username, String password, String firstname,
+    String lastname, String email, Boolean enabled,
+    Date lastPasswordResetDate) {
+        User user = new User(lastname, firstname);
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setEmail(email);
+        user.setLastPasswordResetDate(lastPasswordResetDate);
+        user.setEnabled(enabled);
+        return user;
+    }
     @Test
     public void aCreateDockerTest() throws Exception {
         String res = this.mock.perform(post("/containers/create")
@@ -178,6 +215,25 @@ public class DockerRestControllerTest{
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void mTestRenameDocker() throws Exception {
+        String res = this.mock.perform(post("/user")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(testUser)))
+        .andReturn().getResponse().getContentAsString();
+        JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
+        Long idDocker = jsonres.get("user").get("dockers").get(0).get("id").asLong();
+        logger.info("Content res " + res.toString());
+        logger.info("idDocker content : " + idDocker);
+        String token = this.setJwtToken("Nathou", "123456789");
+        logger.info("Token value : " + token);
+        
+        this.mock.perform(post("/containers/" + idDocker + "/rename/toto")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
     }
 
 }
