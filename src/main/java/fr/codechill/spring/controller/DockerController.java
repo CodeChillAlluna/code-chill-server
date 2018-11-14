@@ -114,7 +114,6 @@ public class DockerController {
         logger.info("Get stats for docker " + id + " with status code : " + res.getStatusCodeValue());
         return res;
     }
-
     public DockerStats parseDockerStatsResponse(DockerStats dockerStats, ResponseEntity<?> resp) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -149,5 +148,17 @@ public class DockerController {
             logger.info("Cannot retrieve all infos, is the docker on ?");
         }
         return dockerStats;
+    }
+
+    public ResponseEntity <?> renameDocker(String containerId, String containerName) {
+        String dockerRenameUrl = BASE_URL + "/containers/"+containerId+"/rename";
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode body = mapper.createObjectNode();
+        body.put("name", containerName);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<String>(body.toString(), headers);
+        ResponseEntity<String> res = this.customRestTemplate.exchange(dockerRenameUrl, HttpMethod.POST, entity, String.class);
+        return ResponseEntity.ok(body);
     }
 }

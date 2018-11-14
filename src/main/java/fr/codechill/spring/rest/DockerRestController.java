@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -144,7 +145,30 @@ public class DockerRestController {
         if (docker != null && !docker.getName().equals(dockerStats.getName())) {
             docker.setName(dockerStats.getName());
             this.drepo.save(docker);
+
         }
         return ResponseEntity.ok().headers(headers).body(dockerStats);
     }
+
+    @PostMapping(value="containers/{id}/rename", produces="application/json")
+    public ResponseEntity <?> renameDocker(@RequestHeader(value="Authorization")String token, String containerName,@PathVariable("id") Long id) {
+        Docker docker = drepo.findOne(id);
+        String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+        User user = this.urepo.findByUsername(username);
+        if (!user.getDockers().contains(docker)) {
+            ObjectMapper mapper = new ObjectMapper();
+            HttpHeaders headers = new HttpHeaders();
+            ObjectNode body = mapper.createObjectNode();
+            body.put("message", "The docker with id " + id + " doesn't exist or you don't own it!");
+            return ResponseEntity.badRequest().headers(headers).body(body);
+        }
+        ResponseEntity<?> resp = this.dcontroller.renameDocker(docker.getContainerId(), containerName);
+        if (resp.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
+            docker.setName(containerName);
+            this.drepo.save(docker);
+        }
+
+        return resp;
+    }
+
 }
