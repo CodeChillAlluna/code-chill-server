@@ -75,7 +75,10 @@ public class DockerRestControllerTest{
             .build();
         this.mapper = new ObjectMapper();
         this.setJwtToken("dummy","admin");
-        this.testUser = setUpUser(username, password, firstname, lastname, email, enabled, lastPasswordResetDate);
+        List<Authority> authorities = new ArrayList<Authority>();
+        Authority authorityUser = this.createAuthority(1L, AuthorityName.ROLE_USER);
+        authorities = this.addAuthority(authorities, authorityUser);
+        this.testUser = setUpUser(username, password, firstname, lastname, email, enabled, lastPasswordResetDate,authorities);
     }
 
     public String setJwtToken(String username,String password) {
@@ -102,15 +105,29 @@ public class DockerRestControllerTest{
 
     public User setUpUser(String username, String password, String firstname,
     String lastname, String email, Boolean enabled,
-    Date lastPasswordResetDate) {
+    Date lastPasswordResetDate,List<Authority> authorities) {
         User user = new User(lastname, firstname);
         user.setUsername(username);
         user.setPassword(password);
+        user.setAuthorities(authorities);
         user.setEmail(email);
         user.setLastPasswordResetDate(lastPasswordResetDate);
         user.setEnabled(enabled);
         return user;
     }
+
+    public Authority createAuthority(Long id, AuthorityName name) {
+        Authority authority = new Authority();
+        authority.setId(id);
+        authority.setName(name);
+        return authority;
+    }
+
+    public List<Authority> addAuthority(List<Authority> authorities, Authority authority) {
+        authorities.add(authority);
+        return authorities;
+    }
+
     @Test
     public void aCreateDockerTest() throws Exception {
         String res = this.mock.perform(post("/containers/create")

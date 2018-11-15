@@ -48,4 +48,4 @@ app:
 logging:
   level:
     org.springframework:
-     security: INFO
+     security: info
