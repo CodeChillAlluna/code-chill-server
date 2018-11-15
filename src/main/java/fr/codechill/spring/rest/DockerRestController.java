@@ -7,12 +7,14 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -144,7 +146,31 @@ public class DockerRestController {
         if (docker != null && !docker.getName().equals(dockerStats.getName())) {
             docker.setName(dockerStats.getName());
             this.drepo.save(docker);
+
         }
         return ResponseEntity.ok().headers(headers).body(dockerStats);
     }
+
+    @PostMapping(value="/containers/{id}/rename/{name}", produces="application/json")
+    public ResponseEntity <?> renameDocker(@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id, @PathVariable("name") String name) {
+        Docker docker = drepo.findOne(id);
+        String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+        User user = this.urepo.findByUsername(username);
+        if (!user.getDockers().contains(docker)) {
+            ObjectMapper mapper = new ObjectMapper();
+            HttpHeaders headers = new HttpHeaders();
+            ObjectNode body = mapper.createObjectNode();
+            logger.error("The docker with id " + id + " doesn't exist or you don't own it!");
+            body.put("message", "The docker with id " + id + " doesn't exist or you don't own it!");
+            return ResponseEntity.badRequest().headers(headers).body(body);
+        }
+        ResponseEntity<?> resp = this.dcontroller.renameDocker(docker.getContainerId(), name);
+        if (resp.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
+            logger.info("Successfully renamed your docker with name " + name);
+            docker.setName(name);
+            this.drepo.save(docker);
+        }
+        return resp;
+    }
+
 }

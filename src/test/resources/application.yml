@@ -45,7 +45,7 @@ app:
   minPort: 64000
   maxPort: 64050
 
-#logging:
-#  level:
-#    org.springframework:
-#      security: DEBUG
+logging:
+  level:
+    org.springframework:
+     security: info
