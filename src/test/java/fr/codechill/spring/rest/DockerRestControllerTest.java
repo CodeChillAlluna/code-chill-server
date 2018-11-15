@@ -2,18 +2,21 @@ package fr.codechill.spring.rest;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.*;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -31,17 +34,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.codechill.spring.CodeChillApplication;
-import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import fr.codechill.spring.model.security.AuthorityName;
-import fr.codechill.spring.repository.UserRepository;
-import fr.codechill.spring.utils.rest.CustomRestTemplate;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes=CodeChillApplication.class)
@@ -71,7 +66,6 @@ public class DockerRestControllerTest{
     public void setUp() {
         this.mock = MockMvcBuilders
             .webAppContextSetup(context)
-            .apply(springSecurity())
             .build();
         this.mapper = new ObjectMapper();
         this.setJwtToken("dummy","admin");
@@ -236,21 +230,40 @@ public class DockerRestControllerTest{
 
     @Test
     public void mTestRenameDocker() throws Exception {
+        // Create User
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
         .content(asJsonString(testUser)))
         .andReturn().getResponse().getContentAsString();
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
         Long idDocker = jsonres.get("user").get("dockers").get(0).get("id").asLong();
-        logger.info("Content res " + res.toString());
-        logger.info("idDocker content : " + idDocker);
-        String token = this.setJwtToken("Nathou", "123456789");
-        logger.info("Token value : " + token);
+
+        // Auth User
+        String token = this.setJwtToken(this.username, "123456789");
         
+        // Test renaming docker
         this.mock.perform(post("/containers/" + idDocker + "/rename/toto")
         .header("Authorization", "Bearer " + token)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is2xxSuccessful());
+
+        // Stop Docker
+        this.mock.perform(post("/containers/" + idDocker + "/stop")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andReturn().getResponse().getContentAsString();
+
+        // Remove Docker
+        this.mock.perform(delete("/containers/" + idDocker)
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andReturn().getResponse().getContentAsString();
+
+        // Remove User
+        this.mock.perform(delete("/user")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andReturn().getResponse().getContentAsString();
     }
 
 }

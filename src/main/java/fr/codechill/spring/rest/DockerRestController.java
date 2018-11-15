@@ -151,7 +151,7 @@ public class DockerRestController {
         return ResponseEntity.ok().headers(headers).body(dockerStats);
     }
 
-    @PostMapping(value="containers/{id}/rename/{name}", produces="application/json")
+    @PostMapping(value="/containers/{id}/rename/{name}", produces="application/json")
     public ResponseEntity <?> renameDocker(@RequestHeader(value="Authorization") String token, @PathVariable("id") Long id, @PathVariable("name") String name) {
         Docker docker = drepo.findOne(id);
         String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
