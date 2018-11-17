@@ -46,10 +46,12 @@ public class DockerController {
         this.drepo = drepo;
     }
 
-    public Docker createDocker() {
+    public Docker createDocker(String name) {
         String dockerCreatetUrl = BASE_URL + "/containers/create";
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
+        logger.info("name value to the controller : " + name);
+        body.put("name",name);
         body.put("Image", "codechillaluna/code-chill-ide");
         body.put("Hostname", "chill");
         body.put("tty", true);
@@ -75,13 +77,15 @@ public class DockerController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<String>(body.toString(), headers);
-
+        logger.info("body content : " + body.toString());
         ResponseEntity<String> res = this.customRestTemplate.exchange(dockerCreatetUrl, HttpMethod.POST, entity, String.class);
         Docker docker;
         try {
             JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
-            docker = new Docker(id.get("Id").textValue(), port);
+            logger.info("id content : " + id.toString());
+            docker = new Docker(body.get("name").textValue(),id.get("Id").textValue(), port);
             this.drepo.save(docker);
+            logger.info("name of the saved docker : " +docker.getName());
         } catch (IOException e) {
             docker = null;
         }

@@ -126,6 +126,7 @@ public class DockerRestControllerTest{
     public void aCreateDockerTest() throws Exception {
         String res = this.mock.perform(post("/containers/create")
             .header("Authorization", "Bearer " + jwtToken)
+            .param("name", "testDockerName")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn()
@@ -233,9 +234,11 @@ public class DockerRestControllerTest{
         // Create User
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
+        .param("name","TestDockerName")
         .content(asJsonString(testUser)))
-        .andReturn().getResponse().getContentAsString();
+        .andReturn().getResponse().getContentAsString();      
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
+        logger.info("json res content : " + jsonres.toString());
         Long idDocker = jsonres.get("user").get("dockers").get(0).get("id").asLong();
 
         // Auth User
@@ -271,8 +274,10 @@ public class DockerRestControllerTest{
         // Create User
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
+        .param("name", "testDockerName")
         .content(asJsonString(testUser)))
         .andReturn().getResponse().getContentAsString();
+        logger.info("RES CONTENT : " + res.toString());
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
         Long idDocker = jsonres.get("user").get("dockers").get(0).get("id").asLong();
 

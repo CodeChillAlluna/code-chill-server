@@ -39,7 +39,7 @@ public class DockerTest {
     @Test
     public void testSetUsers() {
         this.users.clear();
-        Docker dockTest = new Docker(this.containerId, 1);
+        Docker dockTest = new Docker(this.name,this.containerId, 1);
         this.users.add(this.userDummy1);
         dockTest.setUsers(this.users);
         assertNotNull(dockTest.getUsers());
@@ -47,33 +47,33 @@ public class DockerTest {
 
     @Test
     public void testGetLanguages() {
-        Docker dockTest = new Docker(this.containerId, 1);
+        Docker dockTest = new Docker(this.name,this.containerId, 1);
         dockTest.setLanguages(this.languages);
         assertNotNull(dockTest.getLanguages());
     }
     @Test
     public void testGetName() {
-        Docker dockTest = new Docker(this.containerId, 1);
+        Docker dockTest = new Docker(this.name,this.containerId, 1);
         dockTest.setName(this.name);
         assertEquals(this.name, dockTest.getName());
     }
 
     @Test
     public void testGetUsers() {
-        Docker dockTest = new Docker(this.name, 1);
+        Docker dockTest = new Docker(this.name,this.containerId, 1);
         dockTest.setUsers(this.users);
         assertNotNull(dockTest.getUsers());
     }
 
     @Test
     public void testGetContainerId() {
-        Docker dockTest = new Docker(this.containerId, 1);
+        Docker dockTest = new Docker(this.name,this.containerId, 1);
         assertEquals(this.containerId, dockTest.getContainerId());
     }
 
     @Test
     public void testSetContainerId() {
-        Docker dockTest = new Docker("Old Id", 1);
+        Docker dockTest = new Docker(this.name,"Old Id", 1);
         dockTest.setContainerId(this.containerId);
         assertEquals(this.containerId, dockTest.getContainerId());
     }

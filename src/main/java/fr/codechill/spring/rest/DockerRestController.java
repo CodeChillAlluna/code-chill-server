@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.codechill.spring.controller.DockerController;
@@ -115,8 +116,9 @@ public class DockerRestController {
     }
 
     @PostMapping(value="/containers/create", produces = "application/json")
-    public ResponseEntity<?> createDocker (@RequestHeader(value="Authorization") String token) {
-        Docker docker =  dcontroller.createDocker();
+    public ResponseEntity<?> createDocker (@RequestHeader(value="Authorization") String token,@RequestParam (required=true) String name) {
+        Docker docker =  dcontroller.createDocker(name);
+        logger.info("name value to rest: " + name);
         HttpHeaders headers = new HttpHeaders();
         if (docker == null) {
             ObjectMapper mapper = new ObjectMapper();

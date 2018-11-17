@@ -3,6 +3,7 @@ package fr.codechill.spring.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.aspectj.lang.annotation.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,10 +26,11 @@ public class DockerControllerTest {
     private DockerController dockerController;
 
     private static String dockerId;
+    private String nomDocker = "testDocker";
 
     @Test
     public void aCreateDockerTest() {
-        Docker docker = this.dockerController.createDocker();
+        Docker docker = this.dockerController.createDocker(nomDocker);
         dockerId = docker.getContainerId();
         assertNotNull(docker);
     }

@@ -15,18 +15,20 @@ public class UserTest{
     private String nom;
     private String prenom;
     private String nomDocker;
+    private String containerId;
 
     @Before
     public void setUp(){
     this.nom = "michanol";
-        prenom = "nathan";
-        nomDocker = "testNomDocker";
+    this.prenom = "nathan";
+    this.containerId = "containerId";
+    this.nomDocker = "testNomDocker";
     }
 
     @Test
     public void testAddDocker(){
         User userTest = new User(this.nom,this.prenom);
-        Docker dockerTest = new Docker (this.nomDocker, 1);
+        Docker dockerTest = new Docker (this.nomDocker,this.containerId, 1);
         userTest.addDocker(dockerTest);
         assertEquals(true, userTest.getDockers().contains(dockerTest));
     }

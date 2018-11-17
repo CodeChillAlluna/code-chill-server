@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -160,7 +161,7 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<?> addUser(@RequestBody User user) throws BadRequestException {
+    public ResponseEntity<?> addUser(@RequestBody User user,@RequestParam String name) throws BadRequestException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
         HttpHeaders responseHeaders = new HttpHeaders();
@@ -175,7 +176,7 @@ public class UserController {
             return ResponseEntity.badRequest().headers(responseHeaders).body(body);
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        Docker docker = this.dcontroller.createDocker();
+        Docker docker = this.dcontroller.createDocker(name);
         user.addDocker(docker);
         Authority authority = arepo.findByName(AuthorityName.ROLE_USER);
         List<Authority> authorities = new ArrayList<Authority>(1);

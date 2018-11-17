@@ -13,6 +13,7 @@ public class LanguageTest {
 
     private Long id;
     private String name;
+    private String dockerName;
     private Docker docker;
     private Language language;
     private List <Docker> dockers;
@@ -21,7 +22,8 @@ public class LanguageTest {
     public void setUp() {
         this.id = 1L;
         this.name = "testLanguage";
-        this.docker = new Docker ("test", 1);
+        this.dockerName = "testDocker";
+        this.docker = new Docker (this.name,"test", 1);
         this.dockers = new ArrayList<>();
         dockers.add(docker);
     }
