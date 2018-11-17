@@ -86,7 +86,7 @@ Before starting the application don't forget to start the server. If you have no
 mvn spring-boot:run
 ```
 
-Then you can go to : http://localhost:3000 to view the app.
+Then you can request : http://localhost:8080 to view use the API.
 
 
 
