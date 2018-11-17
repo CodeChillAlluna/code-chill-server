@@ -1,22 +1,20 @@
 version: "3.3"
 
 services:
-  codechill_client:
+  code-chill-server:
     build:
       context: .
       dockerfile: DockerFile
+    image: codechillaluna/code-chill-server
     volumes:
     - $HOME/config:/config/
     ports:
     - "8080:8080"
     depends_on:
-    - db
-  db:
+    - code-chill-db
+  code-chill-db:
     image: postgres:10.5-alpine
     environment:
       POSTGRES_PASSWORD: chill
       POSTGRES_USER: code
       POSTGRES_DB: codechill
-
-#volumes:
-#  config:

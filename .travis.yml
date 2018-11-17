@@ -17,5 +17,14 @@ before_script:
 script:
   - ./mvnw clean package -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report
         
+before_deploy:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - ./install/deploy.sh 2
+deploy:
+  provider: script
+  script: docker push codechillaluna/code-chill-server
+  on:
+    branch: master
+
 notifications:
   email: false
