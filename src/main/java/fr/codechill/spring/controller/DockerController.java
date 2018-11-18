@@ -50,7 +50,6 @@ public class DockerController {
         String dockerCreatetUrl = BASE_URL + "/containers/create";
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
-        logger.info("name value to the controller : " + name);
         body.put("name",name);
         body.put("Image", "codechillaluna/code-chill-ide");
         body.put("Hostname", "chill");

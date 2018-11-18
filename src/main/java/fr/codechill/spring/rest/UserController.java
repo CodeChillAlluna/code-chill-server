@@ -161,7 +161,7 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<?> addUser(@RequestBody User user,@RequestParam String name) throws BadRequestException {
+    public ResponseEntity<?> addUser(@RequestBody User user,@RequestParam (required=true) String name) throws BadRequestException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
         HttpHeaders responseHeaders = new HttpHeaders();
