@@ -161,7 +161,7 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<?> addUser(@RequestBody User user,@RequestParam (required=true) String name) throws BadRequestException {
+    public ResponseEntity<?> addUser(@RequestBody User user) throws BadRequestException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
         HttpHeaders responseHeaders = new HttpHeaders();
@@ -176,7 +176,7 @@ public class UserController {
             return ResponseEntity.badRequest().headers(responseHeaders).body(body);
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        Docker docker = this.dcontroller.createDocker(name);
+        Docker docker = this.dcontroller.createDocker("docker of "+user.getUsername());
         user.addDocker(docker);
         Authority authority = arepo.findByName(AuthorityName.ROLE_USER);
         List<Authority> authorities = new ArrayList<Authority>(1);

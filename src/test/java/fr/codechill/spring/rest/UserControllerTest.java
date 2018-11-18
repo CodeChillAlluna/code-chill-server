@@ -146,17 +146,8 @@ public class UserControllerTest{
     public void testAddUser() throws Exception {
         this.mock.perform(post("/user")
             .contentType(MediaType.APPLICATION_JSON)
-            .param("name", "dockerTestName")
             .content(asJsonString(testUser)))
             .andExpect(status().is2xxSuccessful());
-    }
-
-    @Test
-    public void testAddUserWithoutDockerName() throws Exception {
-        this.mock.perform(post("/user")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(asJsonString(testUser)))
-            .andExpect(status().is4xxClientError());
     }
 
     @Test
