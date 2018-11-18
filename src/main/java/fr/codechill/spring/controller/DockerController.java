@@ -47,10 +47,9 @@ public class DockerController {
     }
 
     public Docker createDocker(String name) {
-        String dockerCreatetUrl = BASE_URL + "/containers/create";
+        String dockerCreatetUrl = BASE_URL + "/containers/create?name=" + name;
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode body = mapper.createObjectNode();
-        body.put("name",name);
         body.put("Image", "codechillaluna/code-chill-ide");
         body.put("Hostname", "chill");
         body.put("tty", true);
@@ -82,10 +81,10 @@ public class DockerController {
         try {
             JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
             logger.info("id content : " + id.toString());
-            docker = new Docker(body.get("name").textValue(),id.get("Id").textValue(), port);
+            docker = new Docker(name, id.get("Id").textValue(), port);
             this.drepo.save(docker);
-            logger.info("name of the saved docker : " +docker.getName());
-        } catch (IOException e) {
+            logger.info("name of the saved docker : " + docker.getName());
+        } catch (Exception e) {
             docker = null;
         }
         return docker;

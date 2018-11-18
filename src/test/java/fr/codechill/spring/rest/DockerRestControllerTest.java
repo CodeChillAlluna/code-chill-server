@@ -123,9 +123,10 @@ public class DockerRestControllerTest{
 
     @Test
     public void aCreateDockerTest() throws Exception {
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("testDockerName");
         String res = this.mock.perform(post("/containers/create")
             .header("Authorization", "Bearer " + jwtToken)
-            .param("name", "testDockerName")
+            .content(asJsonString(createDockerRequest))
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn()
@@ -239,9 +240,10 @@ public class DockerRestControllerTest{
     @Test
     public void mTestRenameDocker() throws Exception {
         // Create User
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("TestDockerName");
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
-        .param("name","TestDockerName")
+        .content(asJsonString(createDockerRequest))
         .content(asJsonString(testUser)))
         .andReturn().getResponse().getContentAsString();      
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
@@ -279,9 +281,10 @@ public class DockerRestControllerTest{
     @Test
     public void testRenameDockerOtherUser() throws Exception {
         // Create User
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("testDockerName");
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
-        .param("name", "testDockerName")
+        .content(asJsonString(createDockerRequest))
         .content(asJsonString(testUser)))
         .andReturn().getResponse().getContentAsString();
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
@@ -318,9 +321,10 @@ public class DockerRestControllerTest{
     @Test
     public void testRenameDockerWithInvalidName() throws Exception {
         // Create User
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("testDockerName");
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
-        .param("name", "testDockerName")
+        .content(asJsonString(createDockerRequest))
         .content(asJsonString(testUser)))
         .andReturn().getResponse().getContentAsString();
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
