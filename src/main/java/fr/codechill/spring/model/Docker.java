@@ -39,10 +39,11 @@ public class Docker implements Serializable {
 
     private Docker() {}
 
-    public Docker(String containerId, int port) {
+    public Docker(String name,String containerId, int port) {
+        this.name = name;
         this.containerId = containerId;
         this.port = port;
-        this.name = "";
+       
     }
 
     public Long getId() {

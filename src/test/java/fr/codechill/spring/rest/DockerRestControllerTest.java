@@ -1,6 +1,5 @@
 package fr.codechill.spring.rest;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -124,8 +123,10 @@ public class DockerRestControllerTest{
 
     @Test
     public void aCreateDockerTest() throws Exception {
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("testDockerName");
         String res = this.mock.perform(post("/containers/create")
             .header("Authorization", "Bearer " + jwtToken)
+            .content(asJsonString(createDockerRequest))
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn()
@@ -137,6 +138,14 @@ public class DockerRestControllerTest{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void createDockerWithoutNameTest() throws Exception {
+         this.mock.perform(post("/containers/create")
+            .header("Authorization", "Bearer " + jwtToken)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -231,11 +240,14 @@ public class DockerRestControllerTest{
     @Test
     public void mTestRenameDocker() throws Exception {
         // Create User
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("TestDockerName");
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(createDockerRequest))
         .content(asJsonString(testUser)))
-        .andReturn().getResponse().getContentAsString();
+        .andReturn().getResponse().getContentAsString();      
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
+        logger.info("json res content : " + jsonres.toString());
         Long idDocker = jsonres.get("user").get("dockers").get(0).get("id").asLong();
 
         // Auth User
@@ -267,10 +279,12 @@ public class DockerRestControllerTest{
     }
 
     @Test
-    public void TestRenameDockerOtherUser() throws Exception {
+    public void testRenameDockerOtherUser() throws Exception {
         // Create User
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("testDockerName");
         String res = this.mock.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(createDockerRequest))
         .content(asJsonString(testUser)))
         .andReturn().getResponse().getContentAsString();
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
@@ -281,6 +295,46 @@ public class DockerRestControllerTest{
         
         // Test renaming docker
         this.mock.perform(post("/containers/" + 500 + "/rename/toto")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+
+        // Stop Docker
+        this.mock.perform(post("/containers/" + idDocker + "/stop")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andReturn().getResponse().getContentAsString();
+
+        // Remove Docker
+        this.mock.perform(delete("/containers/" + idDocker)
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andReturn().getResponse().getContentAsString();
+
+        // Remove User
+        this.mock.perform(delete("/user")
+        .header("Authorization", "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
+    public void testRenameDockerWithInvalidName() throws Exception {
+        // Create User
+        CreateDockerRequest createDockerRequest = new CreateDockerRequest("testDockerName");
+        String res = this.mock.perform(post("/user")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(createDockerRequest))
+        .content(asJsonString(testUser)))
+        .andReturn().getResponse().getContentAsString();
+        JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
+        Long idDocker = jsonres.get("user").get("dockers").get(0).get("id").asLong();
+
+        // Auth User
+        String token = this.setJwtToken(this.username, "123456789");
+        
+        // Test renaming docker
+        this.mock.perform(post("/containers/" + idDocker + "/rename/******<<>>>")
         .header("Authorization", "Bearer " + token)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());

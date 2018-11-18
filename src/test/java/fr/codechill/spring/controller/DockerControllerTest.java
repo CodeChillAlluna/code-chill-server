@@ -25,10 +25,11 @@ public class DockerControllerTest {
     private DockerController dockerController;
 
     private static String dockerId;
+    private String nomDocker = "testDocker";
 
     @Test
     public void aCreateDockerTest() {
-        Docker docker = this.dockerController.createDocker();
+        Docker docker = this.dockerController.createDocker(nomDocker);
         dockerId = docker.getContainerId();
         assertNotNull(docker);
     }

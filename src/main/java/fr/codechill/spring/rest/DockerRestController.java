@@ -115,8 +115,8 @@ public class DockerRestController {
     }
 
     @PostMapping(value="/containers/create", produces = "application/json")
-    public ResponseEntity<?> createDocker (@RequestHeader(value="Authorization") String token) {
-        Docker docker =  dcontroller.createDocker();
+    public ResponseEntity<?> createDocker (@RequestHeader(value="Authorization") String token, @RequestBody CreateDockerRequest createDockerRequest) {
+        Docker docker =  dcontroller.createDocker(createDockerRequest.getName());
         HttpHeaders headers = new HttpHeaders();
         if (docker == null) {
             ObjectMapper mapper = new ObjectMapper();

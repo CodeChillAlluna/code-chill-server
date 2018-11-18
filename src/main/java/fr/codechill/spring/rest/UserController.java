@@ -175,7 +175,7 @@ public class UserController {
             return ResponseEntity.badRequest().headers(responseHeaders).body(body);
         }
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        Docker docker = this.dcontroller.createDocker();
+        Docker docker = this.dcontroller.createDocker("env_" + user.getUsername());
         user.addDocker(docker);
         Authority authority = arepo.findByName(AuthorityName.ROLE_USER);
         List<Authority> authorities = new ArrayList<Authority>(1);
