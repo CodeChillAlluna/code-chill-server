@@ -152,6 +152,14 @@ public class UserControllerTest{
     }
 
     @Test
+    public void testAddUserWithoutDockerName() throws Exception {
+        this.mock.perform(post("/user")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(asJsonString(testUser)))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     public void testGetUserWrongToken() throws Exception {
         this.mock.perform(get("/user/1000000000")
             .contentType(MediaType.APPLICATION_JSON))

@@ -141,6 +141,14 @@ public class DockerRestControllerTest{
     }
 
     @Test
+    public void CreateDockerWithoutNameTest() throws Exception {
+         this.mock.perform(post("/containers/create")
+            .header("Authorization", "Bearer " + jwtToken)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     public void bStartDockerTest() throws Exception {
         this.mock.perform(post("/containers/" + dockerId + "/start")
             .header("Authorization", "Bearer " + jwtToken)
@@ -277,7 +285,6 @@ public class DockerRestControllerTest{
         .param("name", "testDockerName")
         .content(asJsonString(testUser)))
         .andReturn().getResponse().getContentAsString();
-        logger.info("RES CONTENT : " + res.toString());
         JsonNode jsonres = this.mapper.readValue(res, JsonNode.class);
         Long idDocker = jsonres.get("user").get("dockers").get(0).get("id").asLong();
 
