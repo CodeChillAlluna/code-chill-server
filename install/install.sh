@@ -136,7 +136,10 @@ setup () {
   sudo apt-get install -y git
 
   # Install jdk
-  sudo apt-get install -y openjdk-11-jdk
+  sudo echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
+  sudo add-apt-repository ppa:linuxuprising/java -y
+  sudo apt-get install -y oracle-java11-installer
+  sudo apt-get install -y oracle-java11-set-default
 
   # Install build automation
   sudo apt-get install -y maven
