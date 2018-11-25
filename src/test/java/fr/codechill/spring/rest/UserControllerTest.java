@@ -1,22 +1,17 @@
 package fr.codechill.spring.rest;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import fr.codechill.spring.CodeChillApplication;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
-import fr.codechill.spring.model.security.AuthorityName;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,15 +27,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = CodeChillApplication.class)
+@SpringBootTest
 @WebAppConfiguration
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class UserControllerTest {
 
-  private MockMvc mock;
   @Autowired private WebApplicationContext context;
-  private User testUser;
-  private User testUser2;
+  private MockMvc mock;
+  private static ObjectMapper mapper;
+  private static UserHelper userHelper;
+  private static User testUser;
   private String username = "Nathou";
   private String password = "123456789";
   private String firstname = "Nathan";
@@ -48,99 +44,23 @@ public class UserControllerTest {
   private String email = "nathou@bonjour.com";
   private Boolean enabled = true;
   private Date lastPasswordResetDate = new Date(1993, 12, 12);
-  private String jwtToken;
 
   @Before
   public void setUp() {
-    this.mock = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-    this.setJwtToken("dummy", "admin");
-    List<Authority> authorities = new ArrayList<Authority>();
-    Authority authorityUser = this.createAuthority(1L, AuthorityName.ROLE_USER);
-    authorities = this.addAuthority(authorities, authorityUser);
-    this.testUser =
-        setUpUser(
-            this.username,
-            this.password,
-            this.firstname,
-            this.lastname,
-            this.email,
-            this.enabled,
-            this.lastPasswordResetDate,
-            authorities);
-    this.testUser2 =
-        setUpUser(
-            this.username + "2",
-            this.password,
-            this.firstname,
-            this.lastname,
-            "nathoupowa972@gmail.com",
-            this.enabled,
-            this.lastPasswordResetDate,
-            authorities);
-    this.addUserToBdd(this.testUser2);
-  }
-
-  public Authority createAuthority(Long id, AuthorityName name) {
-    Authority authority = new Authority();
-    authority.setId(id);
-    authority.setName(name);
-    return authority;
-  }
-
-  public List<Authority> addAuthority(List<Authority> authorities, Authority authority) {
-    authorities.add(authority);
-    return authorities;
-  }
-
-  public User setUpUser(
-      String username,
-      String password,
-      String firstname,
-      String lastname,
-      String email,
-      Boolean enabled,
-      Date lastPasswordResetDate,
-      List<Authority> authorities) {
-    User user = new User(lastname, firstname);
-    user.setUsername(username);
-    user.setPassword(password);
-    user.setAuthorities(authorities);
-    user.setEmail(email);
-    user.setLastPasswordResetDate(lastPasswordResetDate);
-    user.setEnabled(enabled);
-    return user;
-  }
-
-  public void setJwtToken(String username, String password) {
-    ObjectMapper mapper = new ObjectMapper();
-    ObjectNode body = mapper.createObjectNode();
-    body.put("username", username);
-    body.put("password", password);
-    try {
-      String res =
-          this.mock
-              .perform(
-                  post("/auth").contentType(MediaType.APPLICATION_JSON).content(asJsonString(body)))
-              .andReturn()
-              .getResponse()
-              .getContentAsString();
-      JsonNode jsonres = mapper.readValue(res, JsonNode.class);
-      this.jwtToken = jsonres.get("token").textValue();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  public void addUserToBdd(User user) {
-    try {
-      this.mock
-          .perform(
-              post("/user").contentType(MediaType.APPLICATION_JSON).content(asJsonString(user)))
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-    } catch (Exception e) {
-      e.printStackTrace();
+    this.mock = MockMvcBuilders.webAppContextSetup(context).build();
+    if (userHelper == null) {
+      userHelper = new UserHelper(mock);
+      mapper = new ObjectMapper();
+      testUser =
+          userHelper.setUpUser(
+              this.username,
+              this.password,
+              this.firstname,
+              this.lastname,
+              this.email,
+              this.enabled,
+              this.lastPasswordResetDate,
+              new ArrayList<Authority>());
     }
   }
 
@@ -148,78 +68,115 @@ public class UserControllerTest {
   public void testAddUser() throws Exception {
     this.mock
         .perform(
-            post("/user").contentType(MediaType.APPLICATION_JSON).content(asJsonString(testUser)))
+            post("/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonHelper.asJsonString(testUser)))
         .andExpect(status().is2xxSuccessful());
+    String token = userHelper.authUser(this.username, this.password);
+    userHelper.deleteUser(token);
   }
 
   @Test
-  public void testGetUserWrongToken() throws Exception {
+  public void testGetUserWrongUser() throws Exception {
     this.mock
         .perform(get("/user/1000000000").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
 
-  @Test
+  /*@Test
   public void testDeleteUserWrongToken() throws Exception {
     this.mock
         .perform(
-            get("/user")
+            delete("/user")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(
                     "Authorization",
-                    "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhcXd4c3plZGMiLCJhdWQiOiJ3ZWIiLCJleHAiOjE1NDI4MTYyMTAsImlhdCI6MTU0MjIxMTQxMH0.LGnNDHxlgI4Si09-d8hpsPGfhI6a3suviF5uOjTrdPp5ODJSYv47Jez4hafz_uABg7FwhkaRCsHe9JbEYSpYwA"))
+                    "Bearer https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTU0MzE4ODYyMn0.YVMaKJFKxp5ygl2YhNBv0lOL9CZBEZmnkA33zdaR7I_5x_5ATkpXso-SnLUfhuGCHe1WfMJO4M-FG7ZDVPhdrQ"))
         .andExpect(status().is4xxClientError());
-  }
+  }*/
 
   @Test
   public void testAddUserUsername() throws Exception {
-    this.testUser.setUsername("dummy");
+    testUser.setUsername("dummy");
     this.mock
         .perform(
-            post("/user").contentType(MediaType.APPLICATION_JSON).content(asJsonString(testUser)))
+            post("/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonHelper.asJsonString(testUser)))
         .andExpect(status().is4xxClientError());
+    testUser.setUsername(this.username);
   }
 
   @Test
   public void testAddUserEmail() throws Exception {
-    this.testUser.setUsername("Nathou3");
-    this.testUser.setEmail("admin@admin.com");
+    testUser.setEmail("admin@admin.com");
     this.mock
         .perform(
-            post("/user").contentType(MediaType.APPLICATION_JSON).content(asJsonString(testUser)))
+            post("/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonHelper.asJsonString(testUser)))
         .andExpect(status().is4xxClientError());
+    testUser.setEmail(this.email);
   }
 
   @Test
   public void testAuth() throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
+    userHelper.createUser(testUser);
     ObjectNode body = mapper.createObjectNode();
-    body.put("username", "dummy");
-    body.put("password", "admin");
-    this.mock
-        .perform(post("/auth").contentType(MediaType.APPLICATION_JSON).content(asJsonString(body)))
-        .andExpect(status().isOk());
+    body.put("username", username);
+    body.put("password", password);
+    String res =
+        this.mock
+            .perform(
+                post("/auth")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(JsonHelper.asJsonString(body)))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    JsonNode jsonres = mapper.readValue(res, JsonNode.class);
+    String token = jsonres.get("token").textValue();
+    userHelper.deleteUser(token);
   }
 
   @Test
   public void testAuthWrongUser() throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
     body.put("username", "azerty");
     body.put("password", "azerty");
     this.mock
-        .perform(post("/auth").contentType(MediaType.APPLICATION_JSON).content(asJsonString(body)))
+        .perform(
+            post("/auth")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonHelper.asJsonString(body)))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void testGetUser() throws Exception {
+    userHelper.createUser(testUser);
+    String token = userHelper.authUser(username, password);
     this.mock
         .perform(
             get("/user/1")
-                .header("Authorization", "Bearer " + this.jwtToken)
+                .header("Authorization", String.format("Bearer %s", token))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+    userHelper.deleteUser(token);
+  }
+
+  @Test
+  public void testGetBadUser() throws Exception {
+    userHelper.createUser(testUser);
+    String token = userHelper.authUser(username, password);
+    this.mock
+        .perform(
+            get("/user/500")
+                .header("Authorization", String.format("Bearer %s", token))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+    userHelper.deleteUser(token);
   }
 
   /* @Test
@@ -250,14 +207,18 @@ public class UserControllerTest {
           .andReturn().getResponse().getContentAsString();
       // writer.println(res);
   }*/
+
   @Test
   public void testDelete() throws Exception {
+    System.out.println("TESTDELETE");
+    System.out.println(testUser.getEmail());
+    System.out.println(testUser.getUsername());
+    JsonNode user = userHelper.createUser(testUser);
+    System.out.println(user);
+    String token = userHelper.authUser(username, password);
+    System.out.println(token);
     this.mock
-        .perform(delete("/user").header("Authorization", "Bearer " + this.jwtToken))
+        .perform(delete("/user").header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().is2xxSuccessful());
-  }
-
-  public static String asJsonString(final Object obj) throws JsonProcessingException {
-    return new ObjectMapper().writeValueAsString(obj);
   }
 }

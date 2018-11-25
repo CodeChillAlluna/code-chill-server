@@ -16,15 +16,16 @@ public class DockerHelper {
 
   public void createDocker(String userJwtToken, String dockerName) throws Exception {
     CreateDockerRequest createDockerRequest = new CreateDockerRequest(dockerName);
-    this.mock
-        .perform(
-            post("/containers/create")
-                .header("Authorization", String.format("Bearer %s", userJwtToken))
-                .content(JsonHelper.asJsonString(createDockerRequest))
-                .contentType(MediaType.APPLICATION_JSON))
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
+    String res =
+        this.mock
+            .perform(
+                post("/containers/create")
+                    .header("Authorization", String.format("Bearer %s", userJwtToken))
+                    .content(JsonHelper.asJsonString(createDockerRequest))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
   }
 
   public void startDocker(String userJwtToken, Long idDocker) throws Exception {
@@ -62,13 +63,14 @@ public class DockerHelper {
 
   public void removeDocker(String userJwtToken, Long idDocker) throws Exception {
     this.stopDocker(userJwtToken, idDocker);
-    this.mock
-        .perform(
-            delete(String.format("/containers/%d", idDocker))
-                .header("Authorization", String.format("Bearer %s", userJwtToken))
-                .contentType(MediaType.APPLICATION_JSON))
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
+    String res =
+        this.mock
+            .perform(
+                delete(String.format("/containers/%d", idDocker))
+                    .header("Authorization", String.format("Bearer %s", userJwtToken))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
   }
 }

@@ -104,10 +104,14 @@ public class UserHelper {
   }
 
   public void deleteUser(String userJwtToken) throws Exception {
-    this.mock
-        .perform(delete("/user").header("Authorization", String.format("Bearer %s", userJwtToken)))
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
+    String res =
+        this.mock
+            .perform(
+                delete("/user").header("Authorization", String.format("Bearer %s", userJwtToken)))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    System.out.println("DELETE");
+    System.out.println(res);
   }
 }

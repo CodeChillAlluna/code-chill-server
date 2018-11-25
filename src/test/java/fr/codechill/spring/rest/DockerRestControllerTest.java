@@ -12,10 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -31,7 +29,6 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest
 @WebAppConfiguration
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DockerRestControllerTest {
 
   @Autowired private WebApplicationContext context;
@@ -44,7 +41,7 @@ public class DockerRestControllerTest {
   private String password = "123456789";
   private String firstname = "Docker";
   private String lastname = "User";
-  private String email = "nathou@bonjour.com";
+  private String email = "DockerUserTest@bonjour.com";
   private Boolean enabled = true;
   private Date lastPasswordResetDate = new Date(1993, 12, 12);
   private static JsonNode userJson;

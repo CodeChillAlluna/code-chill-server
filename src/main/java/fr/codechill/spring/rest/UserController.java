@@ -93,6 +93,11 @@ public class UserController {
     ObjectNode body = mapper.createObjectNode();
     if (this.urepo.findByUsername(username) != null) {
       User user = this.urepo.findByUsername(username);
+      user.getDockers()
+          .forEach(
+              docker -> {
+                this.dcontroller.deleteDocker(docker.getContainerId());
+              });
       this.urepo.delete(user);
       body.put("message ", " the user " + user.getLastname() + " has been deleted");
       logger.info(body.toString());
