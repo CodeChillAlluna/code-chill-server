@@ -7,9 +7,9 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class CustomRestTemplate extends RestTemplate {
 
-    @Autowired
-    public CustomRestTemplate(RestErrorHandler restErrorHandler) {
-        super();
-        this.setErrorHandler(restErrorHandler);
-    }
+  @Autowired
+  public CustomRestTemplate(RestErrorHandler restErrorHandler) {
+    super();
+    this.setErrorHandler(restErrorHandler);
+  }
 }

@@ -1,5 +1,7 @@
 package fr.codechill.spring.config;
 
+import fr.codechill.spring.security.JwtAuthenticationEntryPoint;
+import fr.codechill.spring.security.JwtAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +16,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import fr.codechill.spring.security.JwtAuthenticationEntryPoint;
-import fr.codechill.spring.security.JwtAuthenticationTokenFilter;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
@@ -23,83 +23,83 @@ import fr.codechill.spring.security.JwtAuthenticationTokenFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+  @Autowired private JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+  @Autowired private UserDetailsService userDetailsService;
 
-    @Autowired
-    public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder
-                .userDetailsService(this.userDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
+  @Autowired
+  public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder)
+      throws Exception {
+    authenticationManagerBuilder
+        .userDetailsService(this.userDetailsService)
+        .passwordEncoder(passwordEncoder());
+  }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
-        return new JwtAuthenticationTokenFilter();
-    }
+  @Bean
+  public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
+    return new JwtAuthenticationTokenFilter();
+  }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                // we don't need CSRF because our token is invulnerable
-                .csrf().disable()
+  @Override
+  protected void configure(HttpSecurity httpSecurity) throws Exception {
+    httpSecurity
+        // we don't need CSRF because our token is invulnerable
+        .csrf()
+        .disable()
+        .exceptionHandling()
+        .authenticationEntryPoint(unauthorizedHandler)
+        .and()
 
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+        // don't create session
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.OPTIONS, "/**")
+        .permitAll()
 
-                // don't create session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        // allow anonymous resource requests
+        .antMatchers(
+            HttpMethod.GET,
+            "/",
+            "/*.html",
+            "/favicon.ico",
+            "/**/*.html",
+            "/**/*.css",
+            "/**/*.js",
+            "/reset/*",
+            "/v2/api-docs",
+            "/webjars/**")
+        .permitAll()
+        .antMatchers(HttpMethod.POST, "/user", "/user/forgottenpassword", "/reset")
+        .permitAll()
 
-                .authorizeRequests()
-                .antMatchers(
-                        HttpMethod.OPTIONS, "/**"
-                ).permitAll()
+        // Un-secure H2 Database
+        .antMatchers("/h2-console/**/**")
+        .permitAll()
+        .antMatchers("/auth/**")
+        .permitAll()
+        .antMatchers("/swagger-ui.html/**")
+        .permitAll()
+        .antMatchers("/swagger-resources/**")
+        .permitAll()
+        .anyRequest()
+        .authenticated();
 
-                // allow anonymous resource requests
-                .antMatchers(
-                        HttpMethod.GET,
-                        "/",
-                        "/*.html",
-                        "/favicon.ico",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js",
-                        "/reset/*",
-                        "/v2/api-docs",
-                        "/webjars/**"
+    // Custom JWT based security filter
+    httpSecurity.addFilterBefore(
+        authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
 
-                ).permitAll()
-
-                .antMatchers(
-                        HttpMethod.POST,
-                        "/user",
-                        "/user/forgottenpassword",
-                        "/reset"
-                ).permitAll()
-
-                // Un-secure H2 Database
-                .antMatchers("/h2-console/**/**").permitAll()
-
-                .antMatchers("/auth/**").permitAll()
-                .antMatchers("/swagger-ui.html/**").permitAll()
-                .antMatchers("/swagger-resources/**").permitAll()
-                .anyRequest().authenticated();
-
-        // Custom JWT based security filter
-        httpSecurity
-                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-
-        // disable page caching
-        httpSecurity
-                .headers()
-                .frameOptions().sameOrigin()  // required to set for H2 else H2 Console will be blank.
-                .cacheControl();
-    }
+    // disable page caching
+    httpSecurity
+        .headers()
+        .frameOptions()
+        .sameOrigin() // required to set for H2 else H2 Console will be blank.
+        .cacheControl();
+  }
 }

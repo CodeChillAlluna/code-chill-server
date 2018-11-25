@@ -1,5 +1,10 @@
 package fr.codechill.spring.rest;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import fr.codechill.spring.security.JwtTokenUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,54 +16,36 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import fr.codechill.spring.security.JwtTokenUtil;
-
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class MethodProtectedRestControllerTest {
 
-    private MockMvc mvc;
+  private MockMvc mvc;
 
-    @Autowired
-    private WebApplicationContext context;
+  @Autowired private WebApplicationContext context;
 
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
+  @MockBean private JwtTokenUtil jwtTokenUtil;
 
-    @Before
-    public void setUp() {
-        mvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .apply(springSecurity())
-                .build();
-    }
+  @Before
+  public void setUp() {
+    mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+  }
 
-    @Test
-    public void shouldGetUnauthorizedWithoutRole() throws Exception{
-        this.mvc
-                .perform(get("/protected"))
-                .andExpect(status().isUnauthorized());
-    }
+  @Test
+  public void shouldGetUnauthorizedWithoutRole() throws Exception {
+    this.mvc.perform(get("/protected")).andExpect(status().isUnauthorized());
+  }
 
-    @Test
-    @WithMockUser(roles = "USER")
-    public void shouldGetForbiddenWithUserRole() throws Exception{
-        this.mvc
-                .perform(get("/protected"))
-                .andExpect(status().isForbidden());
-    }
+  @Test
+  @WithMockUser(roles = "USER")
+  public void shouldGetForbiddenWithUserRole() throws Exception {
+    this.mvc.perform(get("/protected")).andExpect(status().isForbidden());
+  }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    public void shouldGetOkWithAdminRole() throws Exception{
-        this.mvc
-                .perform(get("/protected"))
-                .andExpect(status().is2xxSuccessful());
-    }
-
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldGetOkWithAdminRole() throws Exception {
+    this.mvc.perform(get("/protected")).andExpect(status().is2xxSuccessful());
+  }
 }
-

@@ -7,17 +7,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class CreateDockerRequestTest {
-    
-    @Test
-    public void createEmptyTest() throws Exception {
-        CreateDockerRequest createDockerRequest = new CreateDockerRequest();
-        createDockerRequest.setName("name");
-        assertEquals("name", createDockerRequest.getName());
-    }
 
-    @Test
-    public void createTest() throws Exception {
-        CreateDockerRequest createDockerRequest = new CreateDockerRequest("name");
-        assertEquals("name", createDockerRequest.getName());
-    }
+  @Test
+  public void createEmptyTest() throws Exception {
+    CreateDockerRequest createDockerRequest = new CreateDockerRequest();
+    createDockerRequest.setName("name");
+    assertEquals("name", createDockerRequest.getName());
+  }
+
+  @Test
+  public void createTest() throws Exception {
+    CreateDockerRequest createDockerRequest = new CreateDockerRequest("name");
+    assertEquals("name", createDockerRequest.getName());
+  }
 }
