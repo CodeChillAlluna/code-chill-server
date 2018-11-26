@@ -116,56 +116,56 @@ public class UserController {
     ObjectNode body = mapper.createObjectNode();
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
     User updatedUser = this.urepo.findByUsername(username);
-
+    if (this.urepo.findByUsername(username) == null) {
+      body.put("message", "the user your trying to edit doesn't seem to exist ");
+      return ResponseEntity.badRequest().headers(headers).body(body);
+    }
     if (!updatedUser.getLastname().equals(user.getLastname())) {
       logger.info("updating user lastname with : " + updatedUser.getLastname());
       updatedUser.setLastname(user.getLastname());
-      body.put("message", "user's lastname updated");
-      JwtUser jwtUser = JwtUserFactory.create(user);
-      body.putPOJO("user", jwtUser);
-      logger.info("body " + body.toString());
-      this.urepo.save(updatedUser);
-      return ResponseEntity.ok().headers(headers).body(body);
     }
 
     if (!updatedUser.getFirstname().equals(user.getFirstname())) {
       logger.info("updating user lastname with : " + updatedUser.getFirstname());
       updatedUser.setFirstname(user.getFirstname());
-      body.put("message", "user's firstname updated");
-      JwtUser jwtUser = JwtUserFactory.create(user);
-      body.putPOJO("user", jwtUser);
-      this.urepo.save(updatedUser);
-      return ResponseEntity.ok().headers(headers).body(body);
     }
 
     if (!updatedUser.getEmail().equals(user.getEmail())) {
       updatedUser.setEmail(user.getEmail());
       logger.info("updating user email with : " + updatedUser.getEmail());
       updateUserEmail(updatedUser.getEmail());
-      body.put("message", "user's email updated");
-      JwtUser jwtUser = JwtUserFactory.create(user);
-      body.putPOJO("user", jwtUser);
-      this.urepo.save(updatedUser);
-      return ResponseEntity.ok().headers(headers).body(body);
     }
-    body.put("message", "the user your trying to edit doesn't seem to exist ");
-    return ResponseEntity.badRequest().headers(headers).body(body);
+    JwtUser jwtUser = JwtUserFactory.create(user);
+    body.putPOJO("user", jwtUser);
+    body.put("message", "Successfully update your informations");
+    this.urepo.save(updatedUser);
+    return ResponseEntity.ok().headers(headers).body(body);
   }
 
   @PostMapping("/user")
   public ResponseEntity<?> addUser(@RequestBody User user) throws BadRequestException {
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
+    ObjectNode form = mapper.createObjectNode();
     HttpHeaders responseHeaders = new HttpHeaders();
+    boolean success = true;
     if (urepo.findByUsername(user.getUsername()) != null) {
+      success = false;
       logger.info("An account with this username already exist ");
-      body.put("message", "An account with this username already exist,returning a bad request");
-      return ResponseEntity.badRequest().headers(responseHeaders).body(body);
+      form.put("username", "An account with this username already exist,returning a bad request");
+    } else {
+      form.put("username", "success");
     }
     if (urepo.findByEmail(user.getEmail()) != null) {
+      success = false;
       logger.info("An account with this email already exist,returning a bad request");
-      body.put("message", "An account with this email already exist!");
-      return ResponseEntity.badRequest().headers(responseHeaders).body(body);
+      form.put("email", "An account with this email already exist!");
+    } else {
+      form.put("email", "success");
+    }
+    if (!success) {
+      form.put("message", "An error occured while creating your account!");
+      return ResponseEntity.badRequest().headers(responseHeaders).body(form);
     }
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     Docker docker = this.dcontroller.createDocker("env_" + user.getUsername());

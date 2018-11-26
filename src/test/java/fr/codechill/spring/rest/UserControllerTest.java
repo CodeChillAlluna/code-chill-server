@@ -3,6 +3,7 @@ package fr.codechill.spring.rest;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,6 +44,7 @@ public class UserControllerTest {
   private String lastname = "Michanol";
   private String email = "nathou@bonjour.com";
   private Boolean enabled = true;
+  private String wrongToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjExNTQzMjUyOTk3LCJpYXQiOjE1NDMyNTI5OTh9.3qpbCkt8709a2OVLwaujc8Cv5WItUUQ5J4rj2p0L-niaSqXLnGJRvBC-rh29eZZQGbZOYWfgqPAAKJresGfBQQ";
   private Date lastPasswordResetDate = new Date(1993, 12, 12);
 
   @Before
@@ -83,7 +85,27 @@ public class UserControllerTest {
         .andExpect(status().is4xxClientError());
   }
 
-  /*@Test
+  @Test
+  public void testGetUserWrongToken() throws Exception {
+    this.mock
+        .perform(get("/user/1000000000").contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", String.format("Bearer %s", this.wrongToken)))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void testGetUserInvalidToken() throws Exception {
+      try {
+        this.mock
+        .perform(get("/user/1000000000").contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", String.format("Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjE1NDMyNTI5OTksImlhdCI6MTU0MzI1Mjk5OH0.A0bS4vLZTMYXCVHodzqrAH5nrxfqd12q2YQBl7SJS4f6_Wu7DWW4LMGa_A8wG5Ii0UylwTYRtq0Hd17vCTQelw")))
+        .andExpect(status().is4xxClientError());
+      } catch (Exception e) {
+
+      }
+  }
+
+  @Test
   public void testDeleteUserWrongToken() throws Exception {
     this.mock
         .perform(
@@ -91,9 +113,9 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(
                     "Authorization",
-                    "Bearer https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTU0MzE4ODYyMn0.YVMaKJFKxp5ygl2YhNBv0lOL9CZBEZmnkA33zdaR7I_5x_5ATkpXso-SnLUfhuGCHe1WfMJO4M-FG7ZDVPhdrQ"))
+                    String.format("Bearer %s", this.wrongToken)))
         .andExpect(status().is4xxClientError());
-  }*/
+  }
 
   @Test
   public void testAddUserUsername() throws Exception {
@@ -117,6 +139,20 @@ public class UserControllerTest {
                 .content(JsonHelper.asJsonString(testUser)))
         .andExpect(status().is4xxClientError());
     testUser.setEmail(this.email);
+  }
+
+  @Test
+  public void testEditUserWrongToken() throws Exception {
+    userHelper.createUser(testUser);
+    this.mock
+        .perform(
+            put("/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", String.format("Bearer %s", this.wrongToken))
+                .content(JsonHelper.asJsonString(testUser)))
+        .andExpect(status().is4xxClientError());
+    String token = userHelper.authUser(this.username, this.password);
+    userHelper.deleteUser(token);
   }
 
   @Test
