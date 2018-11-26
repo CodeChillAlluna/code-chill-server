@@ -44,7 +44,8 @@ public class UserControllerTest {
   private String lastname = "Michanol";
   private String email = "nathou@bonjour.com";
   private Boolean enabled = true;
-  private String wrongToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjExNTQzMjUyOTk3LCJpYXQiOjE1NDMyNTI5OTh9.3qpbCkt8709a2OVLwaujc8Cv5WItUUQ5J4rj2p0L-niaSqXLnGJRvBC-rh29eZZQGbZOYWfgqPAAKJresGfBQQ";
+  private String wrongToken =
+      "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjExNTQzMjUyOTk3LCJpYXQiOjE1NDMyNTI5OTh9.3qpbCkt8709a2OVLwaujc8Cv5WItUUQ5J4rj2p0L-niaSqXLnGJRvBC-rh29eZZQGbZOYWfgqPAAKJresGfBQQ";
   private Date lastPasswordResetDate = new Date(1993, 12, 12);
 
   @Before
@@ -88,21 +89,28 @@ public class UserControllerTest {
   @Test
   public void testGetUserWrongToken() throws Exception {
     this.mock
-        .perform(get("/user/1000000000").contentType(MediaType.APPLICATION_JSON)
-        .header("Authorization", String.format("Bearer %s", this.wrongToken)))
+        .perform(
+            get("/user/1000000000")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", String.format("Bearer %s", this.wrongToken)))
         .andExpect(status().is4xxClientError());
   }
 
   @Test
   public void testGetUserInvalidToken() throws Exception {
-      try {
-        this.mock
-        .perform(get("/user/1000000000").contentType(MediaType.APPLICATION_JSON)
-        .header("Authorization", String.format("Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjE1NDMyNTI5OTksImlhdCI6MTU0MzI1Mjk5OH0.A0bS4vLZTMYXCVHodzqrAH5nrxfqd12q2YQBl7SJS4f6_Wu7DWW4LMGa_A8wG5Ii0UylwTYRtq0Hd17vCTQelw")))
-        .andExpect(status().is4xxClientError());
-      } catch (Exception e) {
+    try {
+      this.mock
+          .perform(
+              get("/user/1000000000")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header(
+                      "Authorization",
+                      String.format(
+                          "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJOb1VzZXIiLCJhdWQiOiJ3ZWIiLCJleHAiOjE1NDMyNTI5OTksImlhdCI6MTU0MzI1Mjk5OH0.A0bS4vLZTMYXCVHodzqrAH5nrxfqd12q2YQBl7SJS4f6_Wu7DWW4LMGa_A8wG5Ii0UylwTYRtq0Hd17vCTQelw")))
+          .andExpect(status().is4xxClientError());
+    } catch (Exception e) {
 
-      }
+    }
   }
 
   @Test
@@ -111,9 +119,7 @@ public class UserControllerTest {
         .perform(
             delete("/user")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(
-                    "Authorization",
-                    String.format("Bearer %s", this.wrongToken)))
+                .header("Authorization", String.format("Bearer %s", this.wrongToken)))
         .andExpect(status().is4xxClientError());
   }
 
@@ -152,6 +158,24 @@ public class UserControllerTest {
                 .content(JsonHelper.asJsonString(testUser)))
         .andExpect(status().is4xxClientError());
     String token = userHelper.authUser(this.username, this.password);
+    userHelper.deleteUser(token);
+  }
+
+  @Test
+  public void testEditUser() throws Exception {
+    userHelper.createUser(testUser);
+    testUser.setFirstname("test");
+    testUser.setLastname("test");
+    String token = userHelper.authUser(this.username, this.password);
+    this.mock
+        .perform(
+            put("/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(testUser)))
+        .andExpect(status().is2xxSuccessful());
+    testUser.setFirstname(this.firstname);
+    testUser.setLastname(this.lastname);
     userHelper.deleteUser(token);
   }
 
