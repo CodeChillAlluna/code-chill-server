@@ -280,17 +280,15 @@ public class UserControllerTest {
   @Test
   public void testSetNewPasswordInvalidToken() throws Exception {
     this.mock
-        .perform(post("/reset")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"token\": \"test\"}"))
+        .perform(
+            post("/reset").contentType(MediaType.APPLICATION_JSON).content("{\"token\": \"test\"}"))
         .andExpect(status().is4xxClientError());
   }
 
   @Test
   public void testResetPasswordInvalidToken() throws Exception {
     this.mock
-        .perform(post("/reset/test")
-        .contentType(MediaType.APPLICATION_JSON))
+        .perform(post("/reset/test").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
 }
