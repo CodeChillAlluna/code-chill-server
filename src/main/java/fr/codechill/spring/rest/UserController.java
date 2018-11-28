@@ -255,6 +255,11 @@ public class UserController {
     ObjectNode body = mapper.createObjectNode();
     HttpHeaders responseHeaders = new HttpHeaders();
     User user = urepo.findByTokenPassword(token);
+    if (user == null) {
+      logger.info("Password reset failed due to an invalid token or an out dated one");
+      body.put("message", "Your token is invalid");
+      return ResponseEntity.badRequest().headers(responseHeaders).body(body);
+    }
     Date currentDate = new Date();
     Calendar c = Calendar.getInstance();
     c.setTime(user.getLastPasswordResetDate());
@@ -268,8 +273,8 @@ public class UserController {
       body.putPOJO("user", jwtUser);
       return ResponseEntity.ok().headers(responseHeaders).body(body);
     }
-    logger.info("Password reset failed due to an invalid token or an out dated one");
-    body.put("message", "Your token is invalid or hax expired");
+    logger.info("Password reset failed due to an outdated token");
+    body.put("message", "Your token hax expired");
     return ResponseEntity.badRequest().headers(responseHeaders).body(body);
   }
 

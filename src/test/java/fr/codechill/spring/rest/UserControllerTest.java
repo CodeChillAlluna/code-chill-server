@@ -288,7 +288,7 @@ public class UserControllerTest {
   @Test
   public void testResetPasswordInvalidToken() throws Exception {
     this.mock
-        .perform(post("/reset/test").contentType(MediaType.APPLICATION_JSON))
+        .perform(get("/reset/test").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
 }
