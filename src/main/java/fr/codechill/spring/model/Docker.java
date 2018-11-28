@@ -1,10 +1,10 @@
 package fr.codechill.spring.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.Entity;
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,76 +13,75 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 
 @Entity
 public class Docker implements Serializable {
-    @Id
-    @NotNull
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+  @Id
+  @NotNull
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    private String name;
+  private String name;
 
-    private String containerId;
+  private String containerId;
 
-    private int port;
-    
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "dockers")
-    private List<User> users = new ArrayList<>();
+  private int port;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "docker_language",
-        joinColumns = @JoinColumn(name = "docker_id", referencedColumnName = "id"),
-        inverseJoinColumns = @JoinColumn(name = "language_id", referencedColumnName = "id"))     
-    private List<Language> languages = new ArrayList<>();
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "dockers")
+  private List<User> users = new ArrayList<>();
 
-    private Docker() {}
+  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @JoinTable(
+      name = "docker_language",
+      joinColumns = @JoinColumn(name = "docker_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "language_id", referencedColumnName = "id"))
+  private List<Language> languages = new ArrayList<>();
 
-    public Docker(String name,String containerId, int port) {
-        this.name = name;
-        this.containerId = containerId;
-        this.port = port;
-       
-    }
+  private Docker() {}
 
-    public Long getId() {
-        return id;
-    }
+  public Docker(String name, String containerId, int port) {
+    this.name = name;
+    this.containerId = containerId;
+    this.port = port;
+  }
 
-    public String getName() {
-        return this.name;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public int getPort() {
-        return this.port;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public String getContainerId() {
-        return this.containerId;
-    }
+  public int getPort() {
+    return this.port;
+  }
 
-    public List<User> getUsers() {
-        return this.users;
-    }
+  public String getContainerId() {
+    return this.containerId;
+  }
 
-    public void setUsers(List<User> u) {
-        this.users = u;
-    }
+  public List<User> getUsers() {
+    return this.users;
+  }
 
-    public List<Language> getLanguages() {
-        return this.languages;
-    }
+  public void setUsers(List<User> u) {
+    this.users = u;
+  }
 
-    public void setLanguages(List<Language> l) {
-        this.languages = l;
-    }
+  public List<Language> getLanguages() {
+    return this.languages;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setLanguages(List<Language> l) {
+    this.languages = l;
+  }
 
-    public void setContainerId(String containerId) {
-        this.containerId = containerId;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setContainerId(String containerId) {
+    this.containerId = containerId;
+  }
 }

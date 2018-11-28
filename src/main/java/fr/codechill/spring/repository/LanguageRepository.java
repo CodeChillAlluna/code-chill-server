@@ -1,9 +1,9 @@
 package fr.codechill.spring.repository;
 
-import org.springframework.data.repository.CrudRepository;
-import java.util.List;
 import fr.codechill.spring.model.Language;
+import java.util.List;
+import org.springframework.data.repository.CrudRepository;
 
-public interface LanguageRepository extends CrudRepository<Language, Long>{
-	List<Language> findAll();
+public interface LanguageRepository extends CrudRepository<Language, Long> {
+  List<Language> findAll();
 }
