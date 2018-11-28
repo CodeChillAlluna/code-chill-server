@@ -270,15 +270,27 @@ public class UserControllerTest {
 
   @Test
   public void testDelete() throws Exception {
-    System.out.println("TESTDELETE");
-    System.out.println(testUser.getEmail());
-    System.out.println(testUser.getUsername());
     JsonNode user = userHelper.createUser(testUser);
-    System.out.println(user);
     String token = userHelper.authUser(username, password);
-    System.out.println(token);
     this.mock
         .perform(delete("/user").header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testSetNewPasswordInvalidToken() throws Exception {
+    this.mock
+        .perform(post("/reset")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"token\": \"test\"}"))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void testResetPasswordInvalidToken() throws Exception {
+    this.mock
+        .perform(post("/reset/test")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
   }
 }
