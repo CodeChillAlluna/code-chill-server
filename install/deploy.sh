@@ -20,7 +20,7 @@ build_dockerfile() {
 }
 
 deploy() {
-    if [ $TRAVIS_BRANCH == "master"]
+    if [ "$TRAVIS_BRANCH" == "master"]
     then
       VERSION=`cat $HOME/VERSION`
       docker tag codechillaluna/code-chill-server codechillaluna/code-chill-server:latest
