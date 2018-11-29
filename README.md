@@ -6,7 +6,7 @@ grade](https://img.shields.io/codacy/grade/35fabe502d4341cc9096e5e63812f348/mast
 branch](https://img.shields.io/coveralls/github/CodeChillAlluna/code-chill-server/master.svg?style=for-the-badge)](https://coveralls.io/github/CodeChillAlluna/code-chill-server) 
 [![Code 
 Climate](https://img.shields.io/codeclimate/maintainability/CodeChillAlluna/code-chill-server.svg?style=for-the-badge)](https://codeclimate.com/github/CodeChillAlluna/code-chill-server) 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge)](https://opensource.org/licenses/Apache-2.0)
 
 Master project : Online development environment
 
@@ -192,7 +192,8 @@ version: "3.3"
 
 services:
   code-chill-server:
-    image: codechillaluna/code-chill-server
+  	# You can use any version of our image
+    image: codechillaluna/code-chill-server:latest
     volumes:
     # Change "$HOME/config" by the folder where your application.yml is.
     - $HOME/config:/config/

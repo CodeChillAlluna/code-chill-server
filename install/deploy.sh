@@ -20,7 +20,16 @@ build_dockerfile() {
 }
 
 deploy() {
-    echo "TODO"
+    if [ $TRAVIS_BRANCH == "master"]
+    then
+      VERSION=`cat $HOME/VERSION`
+      docker tag codechillaluna/code-chill-server codechillaluna/code-chill-server:latest
+      docker push codechillaluna/code-chill-server:latest
+    else
+      VERSION=$TRAVIS_BRANCH
+    fi
+    docker tag codechillaluna/code-chill-server codechillaluna/code-chill-server:$VERSION
+    docker push codechillaluna/code-chill-server:$VERSION
 }
 
 if [ "$1" == "0" ]
@@ -33,6 +42,9 @@ then
 elif [ "$1" == "2" ]
 then
   build_dockerfile
+  deploy
+elif [ "$1" == "3" ]
+then
   deploy
 else
   build_app
