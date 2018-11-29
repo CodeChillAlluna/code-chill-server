@@ -23,6 +23,8 @@ before_deploy:
 deploy:
   provider: script
   script: ./install/deploy.sh 3
+  on:
+    all_branches: true
 
 notifications:
   email: false
