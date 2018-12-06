@@ -4,6 +4,7 @@ server:
 
 spring:
   # JACKSON
+  mvc.async.request-timeout: -1 
   jackson:
     serialization:
       INDENT_OUTPUT: true

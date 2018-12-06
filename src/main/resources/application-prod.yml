@@ -6,6 +6,7 @@ server:
 spring:
   #Spring profile
   profiles: "prod"
+  mvc.async.request-timeout: -1 
   # JACKSON
   jackson:
     serialization:
