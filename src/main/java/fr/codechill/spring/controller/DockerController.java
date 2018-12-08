@@ -1,17 +1,15 @@
 package fr.codechill.spring.controller;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.utils.docker.DockerStats;
+import fr.codechill.spring.utils.rest.CustomRestTemplate;
+import java.io.IOException;
+import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -30,18 +28,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import fr.codechill.spring.model.Docker;
-import fr.codechill.spring.repository.DockerRepository;
-import fr.codechill.spring.utils.docker.DockerStats;
-import fr.codechill.spring.utils.rest.CustomRestTemplate;
-
 @Component
 public class DockerController {
 
   private final DockerRepository drepo;
 
-  @Autowired
-  private CustomRestTemplate customRestTemplate;
+  @Autowired private CustomRestTemplate customRestTemplate;
 
   @Value("${app.dockerurl}")
   private String BASE_URL;
@@ -51,9 +43,6 @@ public class DockerController {
 
   @Value("${app.maxPort}")
   private int maxPort;
-
-  @Value("${app.dataFolder}")
-  private String dataFolder;
 
   private static final Logger logger = Logger.getLogger(DockerController.class);
 
@@ -185,25 +174,30 @@ public class DockerController {
     return res;
   }
 
-  public ResponseEntity<StreamingResponseBody> exportContainer(String containerId, String containerName) throws Exception {
-    String exportContainerUrl =
-        String.format("%s/containers/%s/export", BASE_URL, containerId);
-    
+  public ResponseEntity<StreamingResponseBody> exportContainer(
+      String containerId, String containerName) throws Exception {
+    String exportContainerUrl = String.format("%s/containers/%s/export", BASE_URL, containerId);
+
     HttpClient client = HttpClientBuilder.create().build();
     HttpGet request = new HttpGet(exportContainerUrl);
     HttpResponse response = client.execute(request);
-    StreamingResponseBody streamingResponseBody = new StreamingResponseBody(){
-    
-      @Override
-      public void writeTo(OutputStream outputStream) throws IOException {
-        IOUtils.copyLarge(response.getEntity().getContent(), outputStream);
-      }
-    };
+    StreamingResponseBody streamingResponseBody =
+        new StreamingResponseBody() {
+
+          @Override
+          public void writeTo(OutputStream outputStream) throws IOException {
+            IOUtils.copyLarge(response.getEntity().getContent(), outputStream);
+          }
+        };
     int status = response.getStatusLine().getStatusCode();
     if (status != 200) {
-      return new ResponseEntity<StreamingResponseBody>(streamingResponseBody, HttpStatus.valueOf(status));
+      return new ResponseEntity<StreamingResponseBody>(
+          streamingResponseBody, HttpStatus.valueOf(status));
     }
-    return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s.tar\"", containerName))
-            .body(streamingResponseBody);
-  } 
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            String.format("attachment; filename=\"%s.tar\"", containerName))
+        .body(streamingResponseBody);
+  }
 }

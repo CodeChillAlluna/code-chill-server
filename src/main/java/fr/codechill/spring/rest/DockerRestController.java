@@ -1,10 +1,16 @@
 package fr.codechill.spring.rest;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import fr.codechill.spring.controller.DockerController;
+import fr.codechill.spring.exception.BadRequestException;
+import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.User;
+import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.repository.UserRepository;
+import fr.codechill.spring.security.JwtTokenUtil;
+import fr.codechill.spring.utils.docker.DockerActions;
+import fr.codechill.spring.utils.docker.DockerStats;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -20,16 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
-import fr.codechill.spring.controller.DockerController;
-import fr.codechill.spring.exception.BadRequestException;
-import fr.codechill.spring.model.Docker;
-import fr.codechill.spring.model.User;
-import fr.codechill.spring.repository.DockerRepository;
-import fr.codechill.spring.repository.UserRepository;
-import fr.codechill.spring.security.JwtTokenUtil;
-import fr.codechill.spring.utils.docker.DockerActions;
-import fr.codechill.spring.utils.docker.DockerStats;
 
 @CrossOrigin(origins = {"${app.clienturl}"})
 @RestController
@@ -54,16 +50,16 @@ public class DockerRestController {
       message = "There's no docker with this id!";
       logger.error(message);
       throw new BadRequestException(message);
-    }
-    else if (!user.getDockers().contains(docker)) {
+    } else if (!user.getDockers().contains(docker)) {
       message = String.format("You don't own the docker with id %s!", docker.getContainerId());
       logger.error(String.format("You don't own the docker with id %s!", docker.getContainerId()));
-      throw new BadRequestException(String.format("You don't own the docker with id %s!", docker.getContainerId()));
+      throw new BadRequestException(
+          String.format("You don't own the docker with id %s!", docker.getContainerId()));
     }
-
   }
 
-  private ResponseEntity<?> dockerAction(String userToken, Long dockerId, DockerActions action) throws Exception {
+  private ResponseEntity<?> dockerAction(String userToken, Long dockerId, DockerActions action)
+      throws Exception {
     Docker docker = drepo.findOne(dockerId);
     String username = jwtTokenUtil.getUsernameFromToken(userToken.substring(7));
     User user = this.urepo.findByUsername(username);
@@ -80,37 +76,43 @@ public class DockerRestController {
 
   @PostMapping(value = "/containers/{id}/start", produces = "application/json")
   public ResponseEntity<?> startDocker(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) throws Exception {
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     return this.dockerAction(token, id, DockerActions.START);
   }
 
   @PostMapping(value = "/containers/{id}/stop", produces = "application/json")
   public ResponseEntity<?> stopDocker(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) throws Exception {
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     return this.dockerAction(token, id, DockerActions.STOP);
   }
 
   @PostMapping(value = "/containers/{id}/pause", produces = "application/json")
   public ResponseEntity<?> pauseDocker(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) throws Exception {
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     return this.dockerAction(token, id, DockerActions.PAUSE);
   }
 
   @PostMapping(value = "/containers/{id}/resume", produces = "application/json")
   public ResponseEntity<?> resumeDocker(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) throws Exception {
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     return this.dockerAction(token, id, DockerActions.RESUME);
   }
 
   @PostMapping(value = "/containers/{id}/restart", produces = "application/json")
   public ResponseEntity<?> restartDocker(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) throws Exception {
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     return this.dockerAction(token, id, DockerActions.RESTART);
   }
 
   @DeleteMapping(value = "/containers/{id}", produces = "application/json")
   public ResponseEntity<?> deleteDocker(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) throws Exception {
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     Docker docker = drepo.findOne(id);
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
     User user = this.urepo.findByUsername(username);
@@ -151,7 +153,8 @@ public class DockerRestController {
 
   @GetMapping(value = "/containers/{id}/stats", produces = "application/json")
   public ResponseEntity<?> getDockerStats(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) throws Exception {
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     ResponseEntity<?> resp = this.dockerAction(token, id, DockerActions.STATS);
     ResponseEntity<?> respInspect = this.dockerAction(token, id, DockerActions.INSPECT);
     HttpHeaders headers = new HttpHeaders();
@@ -171,7 +174,8 @@ public class DockerRestController {
   public ResponseEntity<?> renameDocker(
       @RequestHeader(value = "Authorization") String token,
       @PathVariable("id") Long id,
-      @PathVariable("name") String name) throws Exception {
+      @PathVariable("name") String name)
+      throws Exception {
     Docker docker = drepo.findOne(id);
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
     User user = this.urepo.findByUsername(username);
@@ -186,10 +190,12 @@ public class DockerRestController {
   }
 
   @GetMapping(value = "/containers/{id}/export")
-  public ResponseEntity<StreamingResponseBody> exportContainer(/*, @RequestHeader(value = "Authorization") String token*/@PathVariable("id") Long id) throws Exception {
+  public ResponseEntity<StreamingResponseBody> exportContainer(
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      throws Exception {
     Docker docker = drepo.findOne(id);
-    //String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
-    User user = this.urepo.findByUsername("Lulu300");
+    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+    User user = this.urepo.findByUsername(username);
     this.checkUserOwnContainer(user, docker);
     return dcontroller.exportContainer(docker.getContainerId(), docker.getName());
   }
