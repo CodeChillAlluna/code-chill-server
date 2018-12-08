@@ -25,14 +25,14 @@ deploy() {
     then
       echo "Master"
       VERSION=`cat VERSION`
-      docker tag code-chill-server codechillaluna/code-chill-server:latest
+      docker tag codechillaluna/code-chill-server codechillaluna/code-chill-server:latest
       docker push codechillaluna/code-chill-server:latest
     else
       echo "Other branch"
       VERSION=$TRAVIS_BRANCH
       echo $VERSION
     fi
-    docker tag code-chill-server codechillaluna/code-chill-server:$VERSION
+    docker tag codechillaluna/code-chill-server codechillaluna/code-chill-server:$VERSION
     docker push codechillaluna/code-chill-server:$VERSION
 }
 
