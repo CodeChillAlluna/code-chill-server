@@ -11,6 +11,7 @@ import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import fr.codechill.spring.utils.docker.DockerActions;
 import fr.codechill.spring.utils.docker.DockerStats;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -198,5 +199,14 @@ public class DockerRestController {
     User user = this.urepo.findByUsername(username);
     this.checkUserOwnContainer(user, docker);
     return dcontroller.exportContainer(docker.getContainerId(), docker.getName());
+  }
+
+  @GetMapping(value = "/images/**/get")
+  public ResponseEntity<StreamingResponseBody> exportContainer(
+      @RequestHeader(value = "Authorization") String token, HttpServletRequest request)
+      throws Exception {
+    String requestURL = request.getRequestURL().toString();
+    String name = requestURL.split("/images/")[1].split("/get")[0];
+    return dcontroller.exportImage(name);
   }
 }

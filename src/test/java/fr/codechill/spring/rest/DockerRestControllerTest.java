@@ -278,4 +278,24 @@ public class DockerRestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
+
+  @Test
+  public void testExportImage() throws Exception {
+    this.mock
+        .perform(
+            get("/images/codechillaluna/code-chill-ide/get/")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testExportImageInvalidId() throws Exception {
+    this.mock
+        .perform(
+            get("/images/500/get/")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
 }

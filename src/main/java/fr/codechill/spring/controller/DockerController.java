@@ -8,13 +8,8 @@ import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.repository.DockerRepository;
 import fr.codechill.spring.utils.docker.DockerStats;
 import fr.codechill.spring.utils.rest.CustomRestTemplate;
-import java.io.IOException;
-import java.io.OutputStream;
-import org.apache.commons.io.IOUtils;
+import fr.codechill.spring.utils.rest.HttpClientHelper;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,10 +39,13 @@ public class DockerController {
   @Value("${app.maxPort}")
   private int maxPort;
 
+  private HttpClientHelper httpClient;
+
   private static final Logger logger = Logger.getLogger(DockerController.class);
 
   public DockerController(DockerRepository drepo) {
     this.drepo = drepo;
+    this.httpClient = new HttpClientHelper();
   }
 
   public Docker createDocker(String name) {
@@ -178,17 +176,10 @@ public class DockerController {
       String containerId, String containerName) throws Exception {
     String exportContainerUrl = String.format("%s/containers/%s/export", BASE_URL, containerId);
 
-    HttpClient client = HttpClientBuilder.create().build();
-    HttpGet request = new HttpGet(exportContainerUrl);
-    HttpResponse response = client.execute(request);
+    HttpResponse response = this.httpClient.get(exportContainerUrl, null);
     StreamingResponseBody streamingResponseBody =
-        new StreamingResponseBody() {
+        this.httpClient.contentToStreamingResponse(response.getEntity().getContent());
 
-          @Override
-          public void writeTo(OutputStream outputStream) throws IOException {
-            IOUtils.copyLarge(response.getEntity().getContent(), outputStream);
-          }
-        };
     int status = response.getStatusLine().getStatusCode();
     if (status != 200) {
       return new ResponseEntity<StreamingResponseBody>(
@@ -198,6 +189,25 @@ public class DockerController {
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
             String.format("attachment; filename=\"%s.tar\"", containerName))
+        .body(streamingResponseBody);
+  }
+
+  public ResponseEntity<StreamingResponseBody> exportImage(String imageName) throws Exception {
+    String exportImageUrl = String.format("%s/images/%s/get", BASE_URL, imageName);
+
+    HttpResponse response = this.httpClient.get(exportImageUrl, null);
+    StreamingResponseBody streamingResponseBody =
+        this.httpClient.contentToStreamingResponse(response.getEntity().getContent());
+
+    int status = response.getStatusLine().getStatusCode();
+    if (status != 200) {
+      return new ResponseEntity<StreamingResponseBody>(
+          streamingResponseBody, HttpStatus.valueOf(status));
+    }
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            String.format("attachment; filename=\"%s.tar\"", imageName))
         .body(streamingResponseBody);
   }
 }
