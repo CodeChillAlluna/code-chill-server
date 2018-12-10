@@ -298,4 +298,26 @@ public class DockerRestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
+
+  @Test
+  public void testExportFile() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    this.mock
+        .perform(
+            get(String.format("/containers/%d/archive/home/code/lib/index.html", idDocker))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testExportFileInvalid() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    this.mock
+        .perform(
+            get(String.format("/containers/%d/archive/home/code/libb/index.html", idDocker))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
 }

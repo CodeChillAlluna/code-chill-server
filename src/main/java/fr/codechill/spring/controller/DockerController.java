@@ -210,4 +210,23 @@ public class DockerController {
             String.format("attachment; filename=\"%s.tar\"", imageName))
         .body(streamingResponseBody);
   }
+
+  public ResponseEntity<StreamingResponseBody> exportFile(String path, String containerId)
+      throws Exception {
+    String exportFileUrl =
+        String.format("%s/containers/%s/archive?path=%s", BASE_URL, containerId, path);
+    HttpResponse response = this.httpClient.get(exportFileUrl, null);
+    StreamingResponseBody streamingResponseBody =
+        this.httpClient.contentToStreamingResponse(response.getEntity().getContent());
+
+    int status = response.getStatusLine().getStatusCode();
+    if (status != 200) {
+      return new ResponseEntity<StreamingResponseBody>(
+          streamingResponseBody, HttpStatus.valueOf(status));
+    }
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s.tar\"", path))
+        .body(streamingResponseBody);
+  }
 }
