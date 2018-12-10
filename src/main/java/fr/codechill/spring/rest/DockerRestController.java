@@ -209,4 +209,19 @@ public class DockerRestController {
     String name = requestURL.split("/images/")[1].split("/get")[0];
     return dcontroller.exportImage(name);
   }
+
+  @GetMapping(value = "/containers/{id}/archive/**")
+  public ResponseEntity<StreamingResponseBody> exportFile(
+      @RequestHeader(value = "Authorization") String token,
+      @PathVariable("id") Long id,
+      HttpServletRequest request)
+      throws Exception {
+    String requestURL = request.getRequestURL().toString();
+    String filePath = requestURL.split("/archive/")[1];
+    Docker docker = drepo.findOne(id);
+    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+    User user = this.urepo.findByUsername(username);
+    this.checkUserOwnContainer(user, docker);
+    return dcontroller.exportFile(filePath, docker.getContainerId());
+  }
 }
