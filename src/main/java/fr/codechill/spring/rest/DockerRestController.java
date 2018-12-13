@@ -192,7 +192,7 @@ public class DockerRestController {
 
   @GetMapping(value = "/containers/{id}/export")
   public ResponseEntity<StreamingResponseBody> exportContainer(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      @RequestHeader(value = "Authorization") String token , @PathVariable("id") Long id)
       throws Exception {
     Docker docker = drepo.findOne(id);
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));

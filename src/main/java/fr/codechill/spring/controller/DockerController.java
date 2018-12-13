@@ -185,11 +185,13 @@ public class DockerController {
       return new ResponseEntity<StreamingResponseBody>(
           streamingResponseBody, HttpStatus.valueOf(status));
     }
-    return ResponseEntity.ok()
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION,
-            String.format("attachment; filename=\"%s.tar\"", containerName))
-        .body(streamingResponseBody);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/octet-stream");
+    headers.add(
+        "Content-Disposition",
+        String.format("attachment; filename=\"%s.tar\"", containerName.replace("/", "")));
+    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+    return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
   }
 
   public ResponseEntity<StreamingResponseBody> exportImage(String imageName) throws Exception {
@@ -204,11 +206,11 @@ public class DockerController {
       return new ResponseEntity<StreamingResponseBody>(
           streamingResponseBody, HttpStatus.valueOf(status));
     }
-    return ResponseEntity.ok()
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION,
-            String.format("attachment; filename=\"%s.tar\"", imageName))
-        .body(streamingResponseBody);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/octet-stream");
+    headers.add("Content-Disposition", String.format("attachment; filename=\"%s.tar\"", imageName));
+    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+    return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
   }
 
   public ResponseEntity<StreamingResponseBody> exportFile(String path, String containerId)
@@ -224,9 +226,10 @@ public class DockerController {
       return new ResponseEntity<StreamingResponseBody>(
           streamingResponseBody, HttpStatus.valueOf(status));
     }
-    return ResponseEntity.ok()
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s.tar\"", path))
-        .body(streamingResponseBody);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/octet-stream");
+    headers.add("Content-Disposition", String.format("attachment; filename=\"%s.tar\"", path));
+    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+    return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
   }
 }
