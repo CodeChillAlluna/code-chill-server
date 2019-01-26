@@ -25,7 +25,7 @@ public class UserTest {
   @Test
   public void testAddDocker() {
     User userTest = new User(this.nom, this.prenom);
-    Docker dockerTest = new Docker(this.nomDocker, this.containerId, 1);
+    Docker dockerTest = new Docker(this.nomDocker, this.containerId, 1, new Image("a", "b"));
     userTest.addDocker(dockerTest);
     assertEquals(true, userTest.getDockers().contains(dockerTest));
   }

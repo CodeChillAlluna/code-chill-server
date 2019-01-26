@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.Image;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.utils.docker.DockerStats;
 import fr.codechill.spring.utils.rest.CustomRestTemplate;
 import fr.codechill.spring.utils.rest.HttpClientHelper;
@@ -28,6 +30,8 @@ public class DockerController {
 
   private final DockerRepository drepo;
 
+  private final ImageRepository irepo;
+
   @Autowired private CustomRestTemplate customRestTemplate;
 
   @Value("${app.dockerurl}")
@@ -43,8 +47,9 @@ public class DockerController {
 
   private static final Logger logger = Logger.getLogger(DockerController.class);
 
-  public DockerController(DockerRepository drepo) {
+  public DockerController(DockerRepository drepo, ImageRepository irepo) {
     this.drepo = drepo;
+    this.irepo = irepo;
     this.httpClient = new HttpClientHelper();
   }
 
@@ -84,10 +89,20 @@ public class DockerController {
     try {
       JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
       logger.info("id content : " + id.toString());
-      docker = new Docker(name, id.get("Id").textValue(), port);
+      System.out.println("BEFORE IMAGE");
+      System.out.println(this.irepo.findByName("codechillaluna/code-chill-ide"));
+      Image image = this.irepo.findByName("codechillaluna/code-chill-ide");
+      System.out.println("AFTER IMAGE");
+      System.out.println(image.getId());
+      System.out.println(new Docker(name, id.get("Id").textValue(), port, image));
+      docker = new Docker(name, id.get("Id").textValue(), port, image);
+      System.out.println("BEFORE SAVE");
+      System.out.println(docker);
       this.drepo.save(docker);
+      System.out.println("AFTER SAVE");
       logger.info("name of the saved docker : " + docker.getName());
     } catch (Exception e) {
+      e.printStackTrace();
       docker = null;
     }
     return docker;

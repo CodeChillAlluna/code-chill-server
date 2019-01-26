@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -37,12 +38,16 @@ public class Docker implements Serializable {
       inverseJoinColumns = @JoinColumn(name = "language_id", referencedColumnName = "id"))
   private List<Language> languages = new ArrayList<>();
 
+  // @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
+  @PrimaryKeyJoinColumn private Image image;
+
   private Docker() {}
 
-  public Docker(String name, String containerId, int port) {
+  public Docker(String name, String containerId, int port, Image image) {
     this.name = name;
     this.containerId = containerId;
     this.port = port;
+    this.image = image;
   }
 
   public Long getId() {
@@ -83,5 +88,13 @@ public class Docker implements Serializable {
 
   public void setContainerId(String containerId) {
     this.containerId = containerId;
+  }
+
+  public Image getImage() {
+    return this.image;
+  }
+
+  public void setImage(Image image) {
+    this.image = image;
   }
 }
