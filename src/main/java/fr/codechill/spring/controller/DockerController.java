@@ -94,7 +94,9 @@ public class DockerController {
       Image image = this.irepo.findByName("codechillaluna/code-chill-ide");
       System.out.println("AFTER IMAGE");
       System.out.println(image.getId());
-      docker = new Docker(name, id.get("Id").textValue(), port, image);
+      System.out.println(id);
+      System.out.println(id.get("Id").asText());
+      docker = new Docker(name, id.get("Id").asText(), port, image);
       System.out.println("BEFORE SAVE");
       System.out.println(docker);
       this.drepo.save(docker);

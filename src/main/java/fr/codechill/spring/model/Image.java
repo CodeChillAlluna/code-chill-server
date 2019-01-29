@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -33,7 +33,7 @@ public class Image implements Serializable {
   private Boolean privacy;
 
   @Column(name = "owner")
-  @PrimaryKeyJoinColumn
+  @JoinColumn(nullable = true)
   private User owner;
 
   public Image() {}

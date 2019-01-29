@@ -65,8 +65,9 @@ public class DockerRestControllerTest {
               new ArrayList<Authority>());
       userJson = userHelper.createUser(testUser);
       token = userHelper.authUser(this.username, this.password);
+    } else {
+      dockerHelper.createDocker(token, "env_DockerUserTest");
     }
-    dockerHelper.createDocker(token, "env_DockerUserTest");
     userJson = userHelper.userInfos(token);
   }
 
@@ -88,6 +89,7 @@ public class DockerRestControllerTest {
                 .content(JsonHelper.asJsonString(createDockerRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+    userJson = userHelper.userInfos(token);
   }
 
   @Test
