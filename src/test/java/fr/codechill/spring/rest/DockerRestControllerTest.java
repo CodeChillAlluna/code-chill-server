@@ -39,7 +39,7 @@ public class DockerRestControllerTest {
   private static UserHelper userHelper;
   private static DockerHelper dockerHelper;
   private static User testUser;
-  private String username = "DockerUserTest";
+  private String username = "DockerUserTest2";
   private String password = "123456789";
   private String firstname = "Docker";
   private String lastname = "User";
