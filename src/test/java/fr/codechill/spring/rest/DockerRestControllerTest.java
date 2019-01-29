@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class DockerRestControllerTest {
 
   @Autowired private WebApplicationContext context;
+  @Autowired private DockerController dockerController;
 
   private MockMvc mock;
   private static UserHelper userHelper;
@@ -87,6 +89,7 @@ public class DockerRestControllerTest {
                 .content(JsonHelper.asJsonString(createDockerRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+    this.dockerController.deleteDocker("DockerRestControllerTest");
   }
 
   @Test
