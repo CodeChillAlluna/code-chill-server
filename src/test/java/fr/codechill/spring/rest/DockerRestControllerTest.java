@@ -50,20 +50,23 @@ public class DockerRestControllerTest {
   @Before
   public void setUp() throws Exception {
     this.mock = MockMvcBuilders.webAppContextSetup(context).build();
-    dockerHelper = new DockerHelper(mock);
-    userHelper = new UserHelper(mock);
-    testUser =
-        userHelper.setUpUser(
-            username,
-            password,
-            firstname,
-            lastname,
-            email,
-            enabled,
-            lastPasswordResetDate,
-            new ArrayList<Authority>());
-    userJson = userHelper.createUser(testUser);
-    token = userHelper.authUser(this.username, this.password);
+    if (userJson == null) {
+      dockerHelper = new DockerHelper(mock);
+      userHelper = new UserHelper(mock);
+      testUser =
+          userHelper.setUpUser(
+              username,
+              password,
+              firstname,
+              lastname,
+              email,
+              enabled,
+              lastPasswordResetDate,
+              new ArrayList<Authority>());
+      userJson = userHelper.createUser(testUser);
+      token = userHelper.authUser(this.username, this.password);
+    }
+    dockerHelper.createDocker(token, "env_DockerUserTest");
     userJson = userHelper.userInfos(token);
   }
 
@@ -73,7 +76,6 @@ public class DockerRestControllerTest {
     for (JsonNode docker : dockers) {
       dockerHelper.removeDocker(token, docker.get("id").asLong());
     }
-    userHelper.deleteUser(token);
   }
 
   @Test
@@ -86,7 +88,6 @@ public class DockerRestControllerTest {
                 .content(JsonHelper.asJsonString(createDockerRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-    userJson = userHelper.userInfos(token);
   }
 
   @Test
@@ -257,7 +258,7 @@ public class DockerRestControllerTest {
         .andExpect(status().is4xxClientError());
   }
 
-  @Test
+  /* @Test
   public void testExportDocker() throws Exception {
     Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
     this.mock
@@ -296,7 +297,7 @@ public class DockerRestControllerTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
-  }
+  } */
 
   @Test
   public void testExportFile() throws Exception {
