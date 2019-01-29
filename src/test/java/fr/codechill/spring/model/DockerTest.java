@@ -77,6 +77,7 @@ public class DockerTest {
   public void testGetImage() {
     Image image = new Image("a", "b", false);
     Docker dockTest = new Docker(this.name, "Old Id", 1, image);
+    dockTest.setImage(image);
     dockTest.setContainerId(this.containerId);
     assertEquals(image, dockTest.getImage());
   }
