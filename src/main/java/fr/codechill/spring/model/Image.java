@@ -110,9 +110,6 @@ public class Image implements Serializable {
         + ", privacy='"
         + privacy
         + "'"
-        + ", owner='"
-        + owner
-        + "'"
         + "}";
   }
 }
