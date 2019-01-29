@@ -1,6 +1,7 @@
 package fr.codechill.spring.rest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -81,6 +82,22 @@ public class ImageRestControllerTest {
   public void getImageByIdInvalid() throws Exception {
     this.mock
         .perform(get("/images/100").header("Authorization", String.format("Bearer %s", token)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void getAllOwnerImages() throws Exception {
+    this.mock
+        .perform(get("/user/images").header("Authorization", String.format("Bearer %s", token)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void updatePrivacyFaillure() throws Exception {
+    this.mock
+        .perform(
+            put("/images/1/privacy/true")
+                .header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().isBadRequest());
   }
 }
