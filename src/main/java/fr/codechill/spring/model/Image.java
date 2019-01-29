@@ -1,7 +1,6 @@
 package fr.codechill.spring.model;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,7 +33,8 @@ public class Image implements Serializable {
   private Boolean privacy;
 
   @Column(name = "owner")
-  @PrimaryKeyJoinColumn private User owner;
+  @PrimaryKeyJoinColumn
+  private User owner;
 
   public Image() {}
 
@@ -97,12 +97,22 @@ public class Image implements Serializable {
 
   @Override
   public String toString() {
-    return "{" +
-      " id='" + id + "'" +
-      ", name='" + name + "'" +
-      ", version='" + version + "'" +
-      ", privacy='" + privacy + "'" +
-      ", owner='" + owner + "'" +
-      "}";
+    return "{"
+        + " id='"
+        + id
+        + "'"
+        + ", name='"
+        + name
+        + "'"
+        + ", version='"
+        + version
+        + "'"
+        + ", privacy='"
+        + privacy
+        + "'"
+        + ", owner='"
+        + owner
+        + "'"
+        + "}";
   }
 }
