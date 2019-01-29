@@ -66,7 +66,7 @@ public class DockerRestControllerTest {
       userJson = userHelper.createUser(testUser);
       token = userHelper.authUser(this.username, this.password);
     }
-    dockerHelper.createDocker(token, "env_DockerUserTest");
+    dockerHelper.createDocker(token, "env_DockerUserTestWork");
     userJson = userHelper.userInfos(token);
   }
 
