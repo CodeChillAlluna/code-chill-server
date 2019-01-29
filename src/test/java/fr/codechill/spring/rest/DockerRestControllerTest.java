@@ -50,32 +50,31 @@ public class DockerRestControllerTest {
   @Before
   public void setUp() throws Exception {
     this.mock = MockMvcBuilders.webAppContextSetup(context).build();
-    if (userJson == null) {
-      dockerHelper = new DockerHelper(mock);
-      userHelper = new UserHelper(mock);
-      testUser =
-          userHelper.setUpUser(
-              username,
-              password,
-              firstname,
-              lastname,
-              email,
-              enabled,
-              lastPasswordResetDate,
-              new ArrayList<Authority>());
-      userJson = userHelper.createUser(testUser);
-      token = userHelper.authUser(this.username, this.password);
-    }
-    dockerHelper.createDocker(token, "env_DockerUserTest");
-    userJson = userHelper.userInfos(token);
+    dockerHelper = new DockerHelper(mock);
+    userHelper = new UserHelper(mock);
+    testUser =
+        userHelper.setUpUser(
+            username,
+            password,
+            firstname,
+            lastname,
+            email,
+            enabled,
+            lastPasswordResetDate,
+            new ArrayList<Authority>());
+    userJson = userHelper.createUser(testUser);
+    token = userHelper.authUser(this.username, this.password);
+    // dockerHelper.createDocker(token, "env_DockerUserTest");
   }
 
   @After
   public void afterTest() throws Exception {
+    userJson = userHelper.userInfos(token);
     JsonNode dockers = userJson.get("dockers");
     for (JsonNode docker : dockers) {
       dockerHelper.removeDocker(token, docker.get("id").asLong());
     }
+    userHelper.deleteUser(token);
   }
 
   @Test
