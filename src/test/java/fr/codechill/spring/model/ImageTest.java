@@ -37,8 +37,8 @@ public class ImageTest {
 
   @Test
   public void testGetOwner() {
-    Image image = new Image("a", "b", false);
     User user = new User("toto", "tata");
+    Image image = new Image("a", "b", false, user);
     image.setOwner(user);
     assertEquals(user, image.getOwner());
   }
