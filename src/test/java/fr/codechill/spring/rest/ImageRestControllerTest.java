@@ -3,11 +3,11 @@ package fr.codechill.spring.rest;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import fr.codechill.spring.model.User;
+import fr.codechill.spring.model.security.Authority;
 import java.util.ArrayList;
 import java.util.Date;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +20,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import fr.codechill.spring.model.User;
-import fr.codechill.spring.model.security.Authority;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -69,27 +66,21 @@ public class ImageRestControllerTest {
   @Test
   public void getAllImages() throws Exception {
     this.mock
-        .perform(
-            get("/images")
-                .header("Authorization", String.format("Bearer %s", token)))
+        .perform(get("/images").header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().isOk());
   }
 
   @Test
   public void getImageById() throws Exception {
     this.mock
-        .perform(
-            get("/images/1")
-                .header("Authorization", String.format("Bearer %s", token)))
+        .perform(get("/images/1").header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().isOk());
   }
 
   @Test
   public void getImageByIdInvalid() throws Exception {
     this.mock
-        .perform(
-            get("/images/100")
-                .header("Authorization", String.format("Bearer %s", token)))
+        .perform(get("/images/100").header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().isBadRequest());
   }
 }
