@@ -38,7 +38,6 @@ public class Docker implements Serializable {
       inverseJoinColumns = @JoinColumn(name = "language_id", referencedColumnName = "id"))
   private List<Language> languages = new ArrayList<>();
 
-  // @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
   @PrimaryKeyJoinColumn private Image image;
 
   private Docker() {}

@@ -33,7 +33,7 @@ public class DockerTest {
   @Test
   public void testSetUsers() {
     this.users.clear();
-    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b"));
+    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b", false));
     this.users.add(this.userDummy1);
     dockTest.setUsers(this.users);
     assertNotNull(dockTest.getUsers());
@@ -41,35 +41,43 @@ public class DockerTest {
 
   @Test
   public void testGetLanguages() {
-    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b"));
+    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b", false));
     dockTest.setLanguages(this.languages);
     assertNotNull(dockTest.getLanguages());
   }
 
   @Test
   public void testGetName() {
-    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b"));
+    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b", false));
     dockTest.setName(this.name);
     assertEquals(this.name, dockTest.getName());
   }
 
   @Test
   public void testGetUsers() {
-    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b"));
+    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b", false));
     dockTest.setUsers(this.users);
     assertNotNull(dockTest.getUsers());
   }
 
   @Test
   public void testGetContainerId() {
-    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b"));
+    Docker dockTest = new Docker(this.name, this.containerId, 1, new Image("a", "b", false));
     assertEquals(this.containerId, dockTest.getContainerId());
   }
 
   @Test
   public void testSetContainerId() {
-    Docker dockTest = new Docker(this.name, "Old Id", 1, new Image("a", "b"));
+    Docker dockTest = new Docker(this.name, "Old Id", 1, new Image("a", "b", false));
     dockTest.setContainerId(this.containerId);
     assertEquals(this.containerId, dockTest.getContainerId());
+  }
+
+  @Test
+  public void testGetImage() {
+    Image image = new Image("a", "b", false);
+    Docker dockTest = new Docker(this.name, "Old Id", 1, image);
+    dockTest.setContainerId(this.containerId);
+    assertEquals(image, dockTest.getImage());
   }
 }

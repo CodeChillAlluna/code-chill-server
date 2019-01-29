@@ -10,4 +10,4 @@ INSERT INTO user_authority (user_id, authority_id) VALUES (1, 2);
 INSERT INTO user_authority (user_id, authority_id) VALUES (2, 1);
 INSERT INTO user_authority (user_id, authority_id) VALUES (3, 1);
 
-INSERT INTO image (id, name, version) VALUES (1, 'codechillaluna/code-chill-ide', 'latest');
+INSERT INTO image (id, name, version, private) VALUES (1, 'codechillaluna/code-chill-ide', 'latest', FALSE);

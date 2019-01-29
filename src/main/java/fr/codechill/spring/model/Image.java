@@ -1,11 +1,13 @@
 package fr.codechill.spring.model;
 
 import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -27,11 +29,26 @@ public class Image implements Serializable {
   @Column(name = "version")
   private String version;
 
+  @NotNull
+  @Column(name = "private")
+  private Boolean privacy;
+
+  @Column(name = "owner")
+  @PrimaryKeyJoinColumn private User owner;
+
   public Image() {}
 
-  public Image(String name, String version) {
+  public Image(String name, String version, Boolean privacy) {
     this.name = name;
     this.version = version;
+    this.privacy = privacy;
+  }
+
+  public Image(String name, String version, Boolean privacy, User owner) {
+    this.name = name;
+    this.version = version;
+    this.privacy = privacy;
+    this.owner = owner;
   }
 
   public Long getId() {
@@ -56,5 +73,36 @@ public class Image implements Serializable {
 
   public void setVersion(String version) {
     this.version = version;
+  }
+
+  public Boolean isPrivacy() {
+    return this.privacy;
+  }
+
+  public Boolean getPrivacy() {
+    return this.privacy;
+  }
+
+  public void setPrivacy(Boolean privacy) {
+    this.privacy = privacy;
+  }
+
+  public User getOwner() {
+    return this.owner;
+  }
+
+  public void setOwner(User owner) {
+    this.owner = owner;
+  }
+
+  @Override
+  public String toString() {
+    return "{" +
+      " id='" + id + "'" +
+      ", name='" + name + "'" +
+      ", version='" + version + "'" +
+      ", privacy='" + privacy + "'" +
+      ", owner='" + owner + "'" +
+      "}";
   }
 }
