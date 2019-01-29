@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import java.util.ArrayList;
@@ -33,13 +32,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class DockerRestControllerTest {
 
   @Autowired private WebApplicationContext context;
-  @Autowired private DockerController dockerController;
 
   private MockMvc mock;
   private static UserHelper userHelper;
   private static DockerHelper dockerHelper;
   private static User testUser;
-  private String username = "DockerUserTest2";
+  private String username = "DockerUserTestWork";
   private String password = "123456789";
   private String firstname = "Docker";
   private String lastname = "User";
@@ -52,29 +50,32 @@ public class DockerRestControllerTest {
   @Before
   public void setUp() throws Exception {
     this.mock = MockMvcBuilders.webAppContextSetup(context).build();
-    dockerHelper = new DockerHelper(mock);
-    userHelper = new UserHelper(mock);
-    testUser =
-        userHelper.setUpUser(
-            username,
-            password,
-            firstname,
-            lastname,
-            email,
-            enabled,
-            lastPasswordResetDate,
-            new ArrayList<Authority>());
-    userJson = userHelper.createUser(testUser);
+    if (userJson == null) {
+      dockerHelper = new DockerHelper(mock);
+      userHelper = new UserHelper(mock);
+      testUser =
+          userHelper.setUpUser(
+              username,
+              password,
+              firstname,
+              lastname,
+              email,
+              enabled,
+              lastPasswordResetDate,
+              new ArrayList<Authority>());
+      userJson = userHelper.createUser(testUser);
+      token = userHelper.authUser(this.username, this.password);
+    }
+    dockerHelper.createDocker(token, "env_DockerUserTest");
+    userJson = userHelper.userInfos(token);
   }
 
   @After
   public void afterTest() throws Exception {
-    userJson = userHelper.userInfos(token);
     JsonNode dockers = userJson.get("dockers");
     for (JsonNode docker : dockers) {
       dockerHelper.removeDocker(token, docker.get("id").asLong());
     }
-    userHelper.deleteUser(token);
   }
 
   @Test
@@ -87,7 +88,6 @@ public class DockerRestControllerTest {
                 .content(JsonHelper.asJsonString(createDockerRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
-    this.dockerController.deleteDocker("DockerRestControllerTest");
   }
 
   @Test
