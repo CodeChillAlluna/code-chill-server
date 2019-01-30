@@ -272,7 +272,7 @@ public class DockerRestControllerTest {
         .andExpect(status().is4xxClientError());
   }
 
-  /* @Test
+  @Test
   public void testExportDocker() throws Exception {
     Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
     this.mock
@@ -311,7 +311,7 @@ public class DockerRestControllerTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
-  } */
+  }
 
   @Test
   public void testExportFile() throws Exception {
