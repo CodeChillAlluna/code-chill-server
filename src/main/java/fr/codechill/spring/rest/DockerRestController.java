@@ -236,12 +236,14 @@ public class DockerRestController {
 
   @PostMapping(value = "/containers/{id}/commit")
   public ResponseEntity<?> commitChange(
-      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id)
+      @RequestHeader(value = "Authorization") String token,
+      @PathVariable("id") Long id,
+      @RequestBody CommitImageRequest commitImageRequest)
       throws Exception {
     Docker docker = drepo.findOne(id);
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
     User user = this.urepo.findByUsername(username);
     this.checkUserOwnContainer(user, docker);
-    return dcontroller.sendCommit(docker.getContainerId());
+    return dcontroller.sendCommit(docker, commitImageRequest);
   }
 }

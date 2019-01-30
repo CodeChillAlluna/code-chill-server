@@ -8,6 +8,7 @@ import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.Image;
 import fr.codechill.spring.repository.DockerRepository;
 import fr.codechill.spring.repository.ImageRepository;
+import fr.codechill.spring.rest.CommitImageRequest;
 import fr.codechill.spring.utils.docker.DockerStats;
 import fr.codechill.spring.utils.rest.CustomRestTemplate;
 import fr.codechill.spring.utils.rest.HttpClientHelper;
@@ -248,14 +249,32 @@ public class DockerController {
     return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
   }
 
-  public ResponseEntity<?> sendCommit(String containerId) throws Exception {
-    String commitChangeUrl = BASE_URL + "/commit?container=" + containerId;
+  public ResponseEntity<?> sendCommit(Docker docker, CommitImageRequest commitImageRequest)
+      throws Exception {
+    String commitChangeUrl =
+        BASE_URL
+            + "/commit?container="
+            + docker.getContainerId()
+            + "&repo="
+            + commitImageRequest.getName()
+            + "&tag="
+            + commitImageRequest.getVersion();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> entity = new HttpEntity<String>(headers);
     ResponseEntity<String> res =
         this.customRestTemplate.exchange(commitChangeUrl, HttpMethod.POST, entity, String.class);
-    logger.info("Commiting changes to the docker having for container ID : " + containerId);
+    System.out.println(res);
+    if (res.getStatusCodeValue() == 201) {
+      logger.info(
+          "Commiting changes to the docker having for container ID : " + docker.getContainerId());
+      Image image =
+          new Image(
+              commitImageRequest.getName(),
+              commitImageRequest.getVersion(),
+              commitImageRequest.getPrivacy());
+      this.irepo.save(image);
+    }
     return res;
   }
 }
