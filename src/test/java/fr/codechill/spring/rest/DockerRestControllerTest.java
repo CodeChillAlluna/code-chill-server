@@ -320,4 +320,25 @@ public class DockerRestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
+
+  @Test
+  public void testCommitChange() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    this.mock
+        .perform(
+            post(String.format("/containers/%s/commit", idDocker))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testCommitInvalidChange() throws Exception {
+    this.mock
+        .perform(
+            post(String.format("/containers/500/commit"))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
 }

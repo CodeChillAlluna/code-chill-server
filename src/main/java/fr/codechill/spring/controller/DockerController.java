@@ -248,4 +248,15 @@ public class DockerController {
     headers.add("Access-Control-Expose-Headers", "Content-Disposition");
     return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
   }
+
+  public ResponseEntity<?> sendCommit(String containerId) throws Exception {
+    String commitChangeUrl = BASE_URL + "/commit?container=" + containerId;
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    ResponseEntity<String> res =
+        this.customRestTemplate.exchange(commitChangeUrl, HttpMethod.POST, entity, String.class);
+    logger.info("Commiting changes to the docker having for container ID : " + containerId);
+    return res;
+  }
 }
