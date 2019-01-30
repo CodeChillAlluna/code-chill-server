@@ -22,7 +22,7 @@ public class LanguageTest {
   public void setUp() {
     this.id = 1L;
     this.name = "testLanguage";
-    this.docker = new Docker(this.name, "test", 1);
+    this.docker = new Docker(this.name, "test", 1, new Image("a", "b", false));
     this.dockers = new ArrayList<>();
     dockers.add(docker);
   }

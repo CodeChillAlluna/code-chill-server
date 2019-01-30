@@ -135,9 +135,12 @@ setup () {
   # Install git
   sudo apt-get install -y git
 
+  sudo apt install dos2unix
+
   # Install jdk
   sudo echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
   sudo add-apt-repository ppa:linuxuprising/java -y
+  sudo apt-get update -y
   sudo apt-get install -y oracle-java11-installer
   sudo apt-get install -y oracle-java11-set-default
 

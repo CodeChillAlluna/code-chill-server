@@ -14,8 +14,8 @@ public class DockerHelper {
     this.mock = mock;
   }
 
-  public void createDocker(String userJwtToken, String dockerName) throws Exception {
-    CreateDockerRequest createDockerRequest = new CreateDockerRequest(dockerName);
+  public void createDocker(String userJwtToken, String dockerName, Long imageId) throws Exception {
+    CreateDockerRequest createDockerRequest = new CreateDockerRequest(dockerName, imageId);
     String res =
         this.mock
             .perform(

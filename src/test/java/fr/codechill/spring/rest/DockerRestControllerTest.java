@@ -37,7 +37,7 @@ public class DockerRestControllerTest {
   private static UserHelper userHelper;
   private static DockerHelper dockerHelper;
   private static User testUser;
-  private String username = "DockerUserTest";
+  private String username = "DockerUserTestWork";
   private String password = "123456789";
   private String firstname = "Docker";
   private String lastname = "User";
@@ -66,7 +66,7 @@ public class DockerRestControllerTest {
       userJson = userHelper.createUser(testUser);
       token = userHelper.authUser(this.username, this.password);
     }
-    dockerHelper.createDocker(token, "env_DockerUserTest");
+    dockerHelper.createDocker(token, "env_DockerUserTestWork", 1L);
     userJson = userHelper.userInfos(token);
   }
 
@@ -80,7 +80,8 @@ public class DockerRestControllerTest {
 
   @Test
   public void createDockerTest() throws Exception {
-    CreateDockerRequest createDockerRequest = new CreateDockerRequest("DockerRestControllerTest");
+    CreateDockerRequest createDockerRequest =
+        new CreateDockerRequest("DockerRestControllerTest", 1L);
     this.mock
         .perform(
             post("/containers/create")
@@ -88,6 +89,19 @@ public class DockerRestControllerTest {
                 .content(JsonHelper.asJsonString(createDockerRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void createDockerTestInvalidImage() throws Exception {
+    CreateDockerRequest createDockerRequest =
+        new CreateDockerRequest("DockerRestControllerTest", 100L);
+    this.mock
+        .perform(
+            post("/containers/create")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(createDockerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -324,20 +338,24 @@ public class DockerRestControllerTest {
   @Test
   public void testCommitChange() throws Exception {
     Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    CommitImageRequest commitImageRequest = new CommitImageRequest("test", "1", true);
     this.mock
         .perform(
             post(String.format("/containers/%s/commit", idDocker))
                 .header("Authorization", "Bearer " + token)
+                .content(JsonHelper.asJsonString(commitImageRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is2xxSuccessful());
   }
 
   @Test
   public void testCommitInvalidChange() throws Exception {
+    CommitImageRequest commitImageRequest = new CommitImageRequest("test2", "1", true);
     this.mock
         .perform(
             post(String.format("/containers/500/commit"))
                 .header("Authorization", "Bearer " + token)
+                .content(JsonHelper.asJsonString(commitImageRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }

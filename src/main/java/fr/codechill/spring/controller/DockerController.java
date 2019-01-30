@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.Image;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.repository.ImageRepository;
+import fr.codechill.spring.rest.CommitImageRequest;
 import fr.codechill.spring.utils.docker.DockerStats;
 import fr.codechill.spring.utils.rest.CustomRestTemplate;
 import fr.codechill.spring.utils.rest.HttpClientHelper;
@@ -28,6 +31,8 @@ public class DockerController {
 
   private final DockerRepository drepo;
 
+  private final ImageRepository irepo;
+
   @Autowired private CustomRestTemplate customRestTemplate;
 
   @Value("${app.dockerurl}")
@@ -43,16 +48,17 @@ public class DockerController {
 
   private static final Logger logger = Logger.getLogger(DockerController.class);
 
-  public DockerController(DockerRepository drepo) {
+  public DockerController(DockerRepository drepo, ImageRepository irepo) {
     this.drepo = drepo;
+    this.irepo = irepo;
     this.httpClient = new HttpClientHelper();
   }
 
-  public Docker createDocker(String name) {
+  public Docker createDocker(String name, Image image) {
     String dockerCreatetUrl = BASE_URL + "/containers/create?name=" + name;
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
-    body.put("Image", "codechillaluna/code-chill-ide");
+    body.put("Image", image.getName() + ":" + image.getVersion());
     body.put("Hostname", "chill");
     body.put("tty", true);
     body.put("OpenStdin", true);
@@ -84,10 +90,11 @@ public class DockerController {
     try {
       JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
       logger.info("id content : " + id.toString());
-      docker = new Docker(name, id.get("Id").textValue(), port);
+      docker = new Docker(name, id.get("Id").asText(), port, image);
       this.drepo.save(docker);
       logger.info("name of the saved docker : " + docker.getName());
     } catch (Exception e) {
+      e.printStackTrace();
       docker = null;
     }
     return docker;
@@ -233,14 +240,32 @@ public class DockerController {
     return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
   }
 
-  public ResponseEntity<?> sendCommit(String containerId) throws Exception {
-    String commitChangeUrl = BASE_URL + "/commit?container=" + containerId;
+  public ResponseEntity<?> sendCommit(Docker docker, CommitImageRequest commitImageRequest)
+      throws Exception {
+    String commitChangeUrl =
+        BASE_URL
+            + "/commit?container="
+            + docker.getContainerId()
+            + "&repo="
+            + commitImageRequest.getName()
+            + "&tag="
+            + commitImageRequest.getVersion();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<String> entity = new HttpEntity<String>(headers);
     ResponseEntity<String> res =
         this.customRestTemplate.exchange(commitChangeUrl, HttpMethod.POST, entity, String.class);
-    logger.info("Commiting changes to the docker having for container ID : " + containerId);
+    System.out.println(res);
+    if (res.getStatusCodeValue() == 201) {
+      logger.info(
+          "Commiting changes to the docker having for container ID : " + docker.getContainerId());
+      Image image =
+          new Image(
+              commitImageRequest.getName(),
+              commitImageRequest.getVersion(),
+              commitImageRequest.getPrivacy());
+      this.irepo.save(image);
+    }
     return res;
   }
 }

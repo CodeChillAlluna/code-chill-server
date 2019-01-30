@@ -17,7 +17,8 @@ public class CreateDockerRequestTest {
 
   @Test
   public void createTest() throws Exception {
-    CreateDockerRequest createDockerRequest = new CreateDockerRequest("name");
+    CreateDockerRequest createDockerRequest = new CreateDockerRequest("name", 1L);
     assertEquals("name", createDockerRequest.getName());
+    assertEquals(Long.valueOf(1), createDockerRequest.getImageId());
   }
 }
