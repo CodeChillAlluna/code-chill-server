@@ -90,17 +90,8 @@ public class DockerController {
     try {
       JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
       logger.info("id content : " + id.toString());
-      System.out.println("BEFORE IMAGE");
-      System.out.println(image);
-      System.out.println("AFTER IMAGE");
-      System.out.println(image.getId());
-      System.out.println(id);
-      System.out.println(id.get("Id").asText());
       docker = new Docker(name, id.get("Id").asText(), port, image);
-      System.out.println("BEFORE SAVE");
-      System.out.println(docker);
       this.drepo.save(docker);
-      System.out.println("AFTER SAVE");
       logger.info("name of the saved docker : " + docker.getName());
     } catch (Exception e) {
       e.printStackTrace();
