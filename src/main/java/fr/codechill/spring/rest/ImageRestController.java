@@ -86,10 +86,11 @@ public class ImageRestController {
     ObjectNode body = mapper.createObjectNode();
     if (image.getOwner() != null && image.getOwner().equals(user)) {
       image.setPrivacy(privacy);
+      this.irepo.save(image);
       body.put("message", "Successfully updating your image privacy");
       return ResponseEntity.ok().headers(headers).body(body);
     }
-    body.put("message", "Failed updating image privacyn you're not the owner of this image");
+    body.put("message", "Failed updating image privacy you're not the owner of this image");
     return ResponseEntity.badRequest().headers(headers).body(body);
   }
 }

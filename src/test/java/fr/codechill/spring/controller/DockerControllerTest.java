@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.Image;
 import fr.codechill.spring.utils.docker.DockerActions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,10 +20,11 @@ public class DockerControllerTest {
   @Autowired private DockerController dockerController;
 
   private static String nomDocker = "DockerControllerTest";
+  private static Image image = new Image("codechillaluna/code-chill-ide", "latest", false);
 
   @Test
   public void CreateDockerTest() {
-    Docker docker = this.dockerController.createDocker(nomDocker);
+    Docker docker = this.dockerController.createDocker(nomDocker, image);
     assertNotNull(docker);
     String dockerId = docker.getContainerId();
     String action = DockerActions.STOP.toString();
@@ -32,7 +34,7 @@ public class DockerControllerTest {
 
   @Test
   public void DockerActionTest() {
-    Docker docker = this.dockerController.createDocker(nomDocker);
+    Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     String action = DockerActions.START.toString();
     assertEquals(
@@ -45,7 +47,7 @@ public class DockerControllerTest {
 
   @Test
   public void DockerStatsTest() {
-    Docker docker = this.dockerController.createDocker(nomDocker);
+    Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     String action = DockerActions.START.toString();
     this.dockerController.dockerAction(dockerId, action, HttpMethod.POST);
@@ -57,7 +59,7 @@ public class DockerControllerTest {
 
   @Test
   public void DockerInspectNoInfoTest() throws Exception {
-    Docker docker = this.dockerController.createDocker(nomDocker);
+    Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     try {
       String action = DockerActions.INSPECT.toString();
@@ -71,7 +73,7 @@ public class DockerControllerTest {
 
   @Test
   public void DeleteDockerTest() {
-    Docker docker = this.dockerController.createDocker(nomDocker);
+    Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     String action = DockerActions.START.toString();
     this.dockerController.dockerAction(dockerId, action, HttpMethod.POST);

@@ -66,7 +66,7 @@ public class DockerRestControllerTest {
       userJson = userHelper.createUser(testUser);
       token = userHelper.authUser(this.username, this.password);
     }
-    dockerHelper.createDocker(token, "env_DockerUserTestWork");
+    dockerHelper.createDocker(token, "env_DockerUserTestWork", 1L);
     userJson = userHelper.userInfos(token);
   }
 
@@ -80,7 +80,8 @@ public class DockerRestControllerTest {
 
   @Test
   public void createDockerTest() throws Exception {
-    CreateDockerRequest createDockerRequest = new CreateDockerRequest("DockerRestControllerTest");
+    CreateDockerRequest createDockerRequest =
+        new CreateDockerRequest("DockerRestControllerTest", 1L);
     this.mock
         .perform(
             post("/containers/create")
@@ -88,6 +89,19 @@ public class DockerRestControllerTest {
                 .content(JsonHelper.asJsonString(createDockerRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void createDockerTestInvalidImage() throws Exception {
+    CreateDockerRequest createDockerRequest =
+        new CreateDockerRequest("DockerRestControllerTest", 100L);
+    this.mock
+        .perform(
+            post("/containers/create")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(createDockerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test

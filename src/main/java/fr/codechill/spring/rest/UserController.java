@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.exception.BadRequestException;
 import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.Image;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import fr.codechill.spring.model.security.AuthorityName;
 import fr.codechill.spring.repository.AuthorityRepository;
+import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import fr.codechill.spring.security.JwtUser;
@@ -44,7 +46,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 public class UserController {
   private final UserRepository urepo;
-
+  private final ImageRepository irepo;
   private final AuthorityRepository arepo;
 
   @Value("${spring.mail.username}")
@@ -63,9 +65,10 @@ public class UserController {
   @Autowired private JwtTokenUtil jwtTokenUtil;
 
   @Autowired
-  public UserController(UserRepository urepo, AuthorityRepository arepo) {
+  public UserController(UserRepository urepo, AuthorityRepository arepo, ImageRepository irepo) {
     this.urepo = urepo;
     this.arepo = arepo;
+    this.irepo = irepo;
   }
 
   @GetMapping("/user/{id}")
@@ -168,7 +171,8 @@ public class UserController {
       return ResponseEntity.badRequest().headers(responseHeaders).body(form);
     }
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    Docker docker = this.dcontroller.createDocker("env_" + user.getUsername());
+    Image image = this.irepo.findByName("codechillaluna/code-chill-ide");
+    Docker docker = this.dcontroller.createDocker("env_" + user.getUsername(), image);
     user.addDocker(docker);
     Authority authority = arepo.findByName(AuthorityName.ROLE_USER);
     List<Authority> authorities = new ArrayList<Authority>(1);

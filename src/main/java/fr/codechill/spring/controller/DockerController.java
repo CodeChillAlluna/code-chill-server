@@ -53,11 +53,11 @@ public class DockerController {
     this.httpClient = new HttpClientHelper();
   }
 
-  public Docker createDocker(String name) {
+  public Docker createDocker(String name, Image image) {
     String dockerCreatetUrl = BASE_URL + "/containers/create?name=" + name;
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
-    body.put("Image", "codechillaluna/code-chill-ide");
+    body.put("Image", image.getName() + ":" + image.getVersion());
     body.put("Hostname", "chill");
     body.put("tty", true);
     body.put("OpenStdin", true);
@@ -90,8 +90,7 @@ public class DockerController {
       JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
       logger.info("id content : " + id.toString());
       System.out.println("BEFORE IMAGE");
-      System.out.println(this.irepo.findByName("codechillaluna/code-chill-ide"));
-      Image image = this.irepo.findByName("codechillaluna/code-chill-ide");
+      System.out.println(image);
       System.out.println("AFTER IMAGE");
       System.out.println(image.getId());
       System.out.println(id);

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.exception.BadRequestException;
 import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.Image;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import fr.codechill.spring.utils.docker.DockerActions;
@@ -33,6 +35,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 public class DockerRestController {
   private final UserRepository urepo;
   private final DockerRepository drepo;
+  private final ImageRepository irepo;
   private static final Logger logger = Logger.getLogger(DockerController.class);
 
   @Autowired private JwtTokenUtil jwtTokenUtil;
@@ -40,9 +43,10 @@ public class DockerRestController {
   @Autowired private DockerController dcontroller;
 
   @Autowired
-  public DockerRestController(UserRepository urepo, DockerRepository drepo) {
+  public DockerRestController(UserRepository urepo, DockerRepository drepo, ImageRepository irepo) {
     this.urepo = urepo;
     this.drepo = drepo;
+    this.irepo = irepo;
   }
 
   private void checkUserOwnContainer(User user, Docker docker) throws BadRequestException {
@@ -136,11 +140,16 @@ public class DockerRestController {
   public ResponseEntity<?> createDocker(
       @RequestHeader(value = "Authorization") String token,
       @RequestBody CreateDockerRequest createDockerRequest) {
-    Docker docker = dcontroller.createDocker(createDockerRequest.getName());
     HttpHeaders headers = new HttpHeaders();
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode body = mapper.createObjectNode();
+    Image image = this.irepo.findOne(createDockerRequest.getImageId());
+    if (image == null) {
+      body.put("message", "This image doesn't exists.");
+      return ResponseEntity.badRequest().headers(headers).body(body);
+    }
+    Docker docker = dcontroller.createDocker(createDockerRequest.getName(), image);
     if (docker == null) {
-      ObjectMapper mapper = new ObjectMapper();
-      ObjectNode body = mapper.createObjectNode();
       body.put("message", "Something went wrong while creating a container");
       return ResponseEntity.badRequest().headers(headers).body(body);
     }
