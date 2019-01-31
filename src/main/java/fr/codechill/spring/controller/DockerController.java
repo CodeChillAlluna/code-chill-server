@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.Image;
+import fr.codechill.spring.model.User;
 import fr.codechill.spring.repository.DockerRepository;
 import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.rest.CommitImageRequest;
@@ -240,8 +241,8 @@ public class DockerController {
     return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
   }
 
-  public ResponseEntity<?> sendCommit(Docker docker, CommitImageRequest commitImageRequest)
-      throws Exception {
+  public ResponseEntity<?> sendCommit(
+      Docker docker, CommitImageRequest commitImageRequest, User user) throws Exception {
     String commitChangeUrl =
         BASE_URL
             + "/commit?container="
@@ -268,7 +269,8 @@ public class DockerController {
             new Image(
                 commitImageRequest.getName(),
                 commitImageRequest.getVersion(),
-                commitImageRequest.getPrivacy());
+                commitImageRequest.getPrivacy(),
+                user);
         this.irepo.save(image);
         docker.setImage(image);
         this.drepo.save(docker);

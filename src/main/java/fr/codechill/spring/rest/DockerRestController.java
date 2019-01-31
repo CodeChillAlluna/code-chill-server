@@ -244,6 +244,6 @@ public class DockerRestController {
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
     User user = this.urepo.findByUsername(username);
     this.checkUserOwnContainer(user, docker);
-    return dcontroller.sendCommit(docker, commitImageRequest);
+    return dcontroller.sendCommit(docker, commitImageRequest, user);
   }
 }
