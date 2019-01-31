@@ -15,4 +15,6 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
   Image findByName(String name);
 
   List<Image> findByOwner(User user);
+
+  Image findByNameAndVersion(String name, String version);
 }

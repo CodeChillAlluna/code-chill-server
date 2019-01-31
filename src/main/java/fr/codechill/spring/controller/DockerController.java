@@ -259,12 +259,20 @@ public class DockerController {
     if (res.getStatusCodeValue() == 201) {
       logger.info(
           "Commiting changes to the docker having for container ID : " + docker.getContainerId());
-      Image image =
-          new Image(
-              commitImageRequest.getName(),
-              commitImageRequest.getVersion(),
-              commitImageRequest.getPrivacy());
-      this.irepo.save(image);
+      Image image;
+      image =
+          this.irepo.findByNameAndVersion(
+              commitImageRequest.getName(), commitImageRequest.getVersion());
+      if (image == null) {
+        image =
+            new Image(
+                commitImageRequest.getName(),
+                commitImageRequest.getVersion(),
+                commitImageRequest.getPrivacy());
+        this.irepo.save(image);
+        docker.setImage(image);
+        this.drepo.save(docker);
+      }
     }
     return res;
   }

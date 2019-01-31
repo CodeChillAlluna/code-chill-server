@@ -8,10 +8,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "image")
+@Table(
+    name = "image",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "version"})})
 public class Image implements Serializable {
 
   @Id
