@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -187,5 +188,22 @@ public class User implements Serializable {
 
   public void deleteDocker(Docker docker) {
     this.dockers.remove(docker);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof User)) {
+      return false;
+    }
+    User user = (User) o;
+    return Objects.equals(id, user.id)
+        && Objects.equals(username, user.username)
+        && Objects.equals(email, user.email);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, username, email);
   }
 }

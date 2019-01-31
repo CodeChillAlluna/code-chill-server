@@ -8,6 +8,7 @@ import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -64,7 +65,12 @@ public class ImageRestController {
   public ResponseEntity<?> getOwnerImages(@RequestHeader(value = "Authorization") String token) {
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
     User user = this.urepo.findByUsername(username);
-    List<Image> images = this.irepo.findByOwner(user);
+    List<Image> images =
+        this.irepo
+            .findAll()
+            .stream()
+            .filter(i -> user.equals(i.getOwner()))
+            .collect(Collectors.toList());
     ObjectMapper mapper = new ObjectMapper();
     HttpHeaders headers = new HttpHeaders();
     ObjectNode body = mapper.createObjectNode();

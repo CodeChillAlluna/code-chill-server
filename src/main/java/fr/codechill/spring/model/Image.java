@@ -1,5 +1,6 @@
 package fr.codechill.spring.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,6 +36,7 @@ public class Image implements Serializable {
   @Column(name = "private")
   private Boolean privacy;
 
+  @JsonIgnore
   @Column(name = "owner")
   @JoinColumn(nullable = true)
   private User owner;
