@@ -9,6 +9,8 @@ public interface DockerRepository extends CrudRepository<Docker, Long> {
 
   Docker findOne(long id);
 
+  List<Docker> findByIdIn(List<Long> ids);
+
   Docker save(Docker docker);
 
   Docker findByName(String name);
