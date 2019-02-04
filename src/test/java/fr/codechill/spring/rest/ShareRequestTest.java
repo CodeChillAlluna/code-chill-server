@@ -3,7 +3,6 @@ package fr.codechill.spring.rest;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
-
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
