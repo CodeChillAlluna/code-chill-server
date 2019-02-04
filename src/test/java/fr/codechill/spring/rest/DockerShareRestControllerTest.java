@@ -115,4 +115,32 @@ public class DockerShareRestControllerTest {
             get("/user/env/1/shared").header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().isOk());
   }
+
+  @Test
+  public void shareEnv() throws Exception {
+    ShareRequest shareRequest = new ShareRequest();
+    shareRequest.setReadOnly(true);
+    shareRequest.setUserId(4L);
+    this.mock
+        .perform(
+            post("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(shareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void shareEnvInvalid() throws Exception {
+    ShareRequest shareRequest = new ShareRequest();
+    shareRequest.setReadOnly(true);
+    shareRequest.setUserId(400L);
+    this.mock
+        .perform(
+            post("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(shareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
 }
