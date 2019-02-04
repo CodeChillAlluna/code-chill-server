@@ -34,19 +34,28 @@ public class DockerShare implements Serializable {
   @NotNull
   private Boolean readOnly;
 
-  @Column(name = "date")
+  @Column(name = "date", nullable = true)
   @Temporal(TemporalType.TIMESTAMP)
-  @NotNull
   private Date expiration;
 
   public DockerShare() {}
 
-  public DockerShare(Long id, Long userId, Long dockerId, Boolean readOnly, Date expiration) {
-    this.id = id;
+  public DockerShare(Long userId, Long dockerId, Boolean readOnly, Date expiration) {
     this.userId = userId;
     this.dockerId = dockerId;
     this.readOnly = readOnly;
     this.expiration = expiration;
+  }
+
+  public DockerShare(Long userId, Long dockerId, Boolean readOnly) {
+    this.userId = userId;
+    this.dockerId = dockerId;
+    this.readOnly = readOnly;
+  }
+
+  public DockerShare(Long userId, Long dockerId) {
+    this.userId = userId;
+    this.dockerId = dockerId;
   }
 
   public Long getId() {

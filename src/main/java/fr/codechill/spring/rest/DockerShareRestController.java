@@ -12,6 +12,7 @@ import fr.codechill.spring.security.JwtTokenUtil;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,7 +73,7 @@ public class DockerShareRestController {
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
     User user = this.urepo.findByUsername(username);
     DockerShare dockerShare = this.dsrepo.findByDockerIdAndUserId(id, user.getId());
-    Calendar c = Calendar.getInstance();
+    Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
     Date currentDate = c.getTime();
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
@@ -78,7 +82,7 @@ public class DockerShareRestController {
       body.put("message", "You don't have access to this environment");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).headers(headers).body(body);
     }
-    if (currentDate.after(dockerShare.getExpiration())) {
+    if (dockerShare.getExpiration() != null && currentDate.after(dockerShare.getExpiration())) {
       body.put("message", "You don't have access to this environment anymore");
       this.dsrepo.delete(dockerShare);
       return ResponseEntity.status(HttpStatus.FORBIDDEN).headers(headers).body(body);
@@ -87,5 +91,50 @@ public class DockerShareRestController {
     return ResponseEntity.ok().headers(headers).body(body);
   }
 
-  // @GetMapping(value = "/user/env/{id}/share", produces = "application/json")
+  @PostMapping(value = "/user/env/{id}/share")
+  public ResponseEntity<?> shareEnv(
+      @RequestHeader(value = "Authorization") String token,
+      @PathVariable("id") Long id,
+      @RequestBody ShareRequest shareRequest) {
+    HttpHeaders headers = new HttpHeaders();
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode body = mapper.createObjectNode();
+    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+    User user = this.urepo.findByUsername(username);
+    User userToShare = this.urepo.findOne(shareRequest.getUserId());
+    Docker docker = this.drepo.findOne(id);
+    if (userToShare == null || docker == null) {
+      body.put("message", "This user or environment doesn't exist");
+      return ResponseEntity.badRequest().headers(headers).body(body);
+    }
+    DockerShare dockerShare = this.dsrepo.findByDockerIdAndUserId(id, userToShare.getId());
+    if (dockerShare == null) {
+      dockerShare = new DockerShare(userToShare.getId(), docker.getId());
+    }
+    dockerShare.setReadOnly(shareRequest.getReadOnly());
+    dockerShare.setExpiration(shareRequest.getExpirationDate());
+    this.dsrepo.save(dockerShare);
+    body.put("message", "Successfully share your environment");
+    return ResponseEntity.ok().headers(headers).body(body);
+  }
+
+  @DeleteMapping(value = "/user/env/{id}/share")
+  public ResponseEntity<?> unshareEnv(
+      @RequestHeader(value = "Authorization") String token,
+      @PathVariable("id") Long id,
+      @RequestBody UnshareRequest unshareRequest) {
+    HttpHeaders headers = new HttpHeaders();
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode body = mapper.createObjectNode();
+    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+    User user = this.urepo.findByUsername(username);
+    DockerShare dockerShare = this.dsrepo.findByDockerIdAndUserId(id, unshareRequest.getUserId());
+    if (dockerShare != null) {
+      this.dsrepo.delete(dockerShare);
+      body.put("message", "Successfully disable access for this user to your environment");
+    } else {
+      body.put("message", "This user doesn't have access to your env, no need to do anything");
+    }
+    return ResponseEntity.ok().headers(headers).body(body);
+  }
 }
