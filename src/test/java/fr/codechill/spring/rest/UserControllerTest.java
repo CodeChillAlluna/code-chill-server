@@ -227,6 +227,19 @@ public class UserControllerTest {
   }
 
   @Test
+  public void testGetAllUsers() throws Exception {
+    userHelper.createUser(testUser);
+    String token = userHelper.authUser(username, password);
+    this.mock
+        .perform(
+            get("/user/all")
+                .header("Authorization", String.format("Bearer %s", token))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+    userHelper.deleteUser(token);
+  }
+
+  @Test
   public void testGetBadUser() throws Exception {
     userHelper.createUser(testUser);
     String token = userHelper.authUser(username, password);

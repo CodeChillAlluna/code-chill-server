@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,19 @@ public class UserController {
     this.urepo = urepo;
     this.arepo = arepo;
     this.irepo = irepo;
+  }
+
+  @GetMapping("/user/all")
+  public ResponseEntity<?> getAllUsers() {
+    ObjectMapper mapper = new ObjectMapper();
+    HttpHeaders headers = new HttpHeaders();
+    ObjectNode body = mapper.createObjectNode();
+    List<User> users = this.urepo.findByEnabled(true);
+    List<JwtUser> jwtUsers =
+        users.stream().map(user -> JwtUserFactory.create(user)).collect(Collectors.toList());
+    body.putPOJO("users", jwtUsers);
+    body.put("message", "Successfully geting user info");
+    return ResponseEntity.ok().headers(headers).body(body);
   }
 
   @GetMapping("/user/{id}")
