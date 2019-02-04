@@ -66,6 +66,26 @@ public class DockerShareRestController {
     return ResponseEntity.ok().headers(headers).body(body);
   }
 
+  @GetMapping(value = "/user/env/{id}/shared", produces = "application/json")
+  public ResponseEntity<?> getAllUserDockerShared(
+      @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) {
+    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+    User user = this.urepo.findByUsername(username);
+    List<DockerShare> dockersShare = this.dsrepo.findByDockerId(id);
+    List<Long> userIds =
+        dockersShare
+            .stream()
+            .map(dockerShare -> dockerShare.getUserId())
+            .collect(Collectors.toList());
+    List<User> users = this.urepo.findByIdIn(userIds);
+    HttpHeaders headers = new HttpHeaders();
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode body = mapper.createObjectNode();
+    body.putPOJO("users", users);
+    body.put("message", "Successfully getting all users with access to your environment");
+    return ResponseEntity.ok().headers(headers).body(body);
+  }
+
   @GetMapping(value = "/user/env/{id}/check", produces = "application/json")
   public ResponseEntity<?> checkUserHaveAccess(
       @RequestHeader(value = "Authorization") String token, @PathVariable("id") Long id) {

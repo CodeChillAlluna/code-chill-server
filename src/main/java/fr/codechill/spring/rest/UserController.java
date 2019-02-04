@@ -73,13 +73,19 @@ public class UserController {
   }
 
   @GetMapping("/user/all")
-  public ResponseEntity<?> getAllUsers() {
+  public ResponseEntity<?> getAllUsers(@RequestHeader(value = "Authorization") String token) {
     ObjectMapper mapper = new ObjectMapper();
     HttpHeaders headers = new HttpHeaders();
     ObjectNode body = mapper.createObjectNode();
+    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+    User user = this.urepo.findByUsername(username);
     List<User> users = this.urepo.findByEnabled(true);
     List<JwtUser> jwtUsers =
-        users.stream().map(user -> JwtUserFactory.create(user)).collect(Collectors.toList());
+        users
+            .stream()
+            .filter(u -> !user.equals(u))
+            .map(u -> JwtUserFactory.create(u))
+            .collect(Collectors.toList());
     body.putPOJO("users", jwtUsers);
     body.put("message", "Successfully geting user info");
     return ResponseEntity.ok().headers(headers).body(body);
