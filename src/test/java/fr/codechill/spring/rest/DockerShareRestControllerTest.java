@@ -1,6 +1,7 @@
 package fr.codechill.spring.rest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,6 +51,7 @@ public class DockerShareRestControllerTest {
     this.mock = MockMvcBuilders.webAppContextSetup(context).build();
     if (userJson == null) {
       userHelper = new UserHelper(mock);
+      dockerHelper = new DockerHelper(mock);
       testUser =
           userHelper.setUpUser(
               username,
@@ -67,6 +70,7 @@ public class DockerShareRestControllerTest {
 
   @After
   public void afterTest() throws Exception {
+    userJson = userHelper.userInfos(token);
     JsonNode dockers = userJson.get("dockers");
     for (JsonNode docker : dockers) {
       dockerHelper.removeDocker(token, docker.get("id").asLong());
@@ -75,8 +79,40 @@ public class DockerShareRestControllerTest {
 
   @Test
   public void getSharedEnvTest() throws Exception {
+    ShareRequest shareRequest = new ShareRequest();
+    shareRequest.setReadOnly(true);
+    shareRequest.setUserId(4L);
+    this.mock
+        .perform(
+            post("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(shareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
     this.mock
         .perform(get("/user/env/shared").header("Authorization", String.format("Bearer %s", token)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void getUsersSharedEnvTest() throws Exception {
+    ShareRequest shareRequest = new ShareRequest();
+    shareRequest.setReadOnly(true);
+    shareRequest.setUserId(4L);
+    this.mock
+        .perform(
+            post("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(shareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+    this.mock
+        .perform(
+            get("/user/env/1/shared").header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().isOk());
   }
 }
