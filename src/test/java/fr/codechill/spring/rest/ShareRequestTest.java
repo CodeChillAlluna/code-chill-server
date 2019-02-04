@@ -16,7 +16,7 @@ public class ShareRequestTest {
     shareRequest.setReadOnly(true);
     shareRequest.setUserId(1L);
     assertEquals(Long.valueOf(1), shareRequest.getUserId());
-    assertEquals(true, shareRequest.getUserId());
+    assertEquals(true, shareRequest.isReadOnly());
     assertEquals(date, shareRequest.getExpirationDate());
   }
 
@@ -25,7 +25,7 @@ public class ShareRequestTest {
     Date date = new Date();
     ShareRequest shareRequest = new ShareRequest(1L, date, true);
     assertEquals(Long.valueOf(1), shareRequest.getUserId());
-    assertEquals(true, shareRequest.getUserId());
+    assertEquals(true, shareRequest.getReadOnly());
     assertEquals(date, shareRequest.getExpirationDate());
   }
 }
