@@ -42,4 +42,26 @@ public class ImageTest {
     image.setOwner(user);
     assertEquals(user, image.getOwner());
   }
+
+  @Test
+  public void print() {
+    Image image = new Image("a", "b", false);
+    image.setId(1L);
+    String str =
+        "{"
+            + " id='"
+            + 1L
+            + "'"
+            + ", name='"
+            + "a"
+            + "'"
+            + ", version='"
+            + "b"
+            + "'"
+            + ", privacy='"
+            + false
+            + "'"
+            + "}";
+    assertEquals(str, image.toString());
+  }
 }
