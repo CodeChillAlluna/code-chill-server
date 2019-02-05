@@ -125,7 +125,6 @@ public class DockerShareRestController {
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
     String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
-    User user = this.urepo.findByUsername(username);
     User userToShare = this.urepo.findOne(shareRequest.getUserId());
     Docker docker = this.drepo.findOne(id);
     if (userToShare == null || docker == null) {

@@ -20,7 +20,6 @@ public class DockerTest {
 
   @Before
   public void setUp() {
-    Long id = 12345L;
     this.name = "testDocker";
     this.containerId = "containerId";
     Language language;
