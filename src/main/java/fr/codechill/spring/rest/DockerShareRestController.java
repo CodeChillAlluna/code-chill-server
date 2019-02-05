@@ -34,7 +34,6 @@ public class DockerShareRestController {
   private final UserRepository urepo;
   private final DockerRepository drepo;
   private final DockerShareRepository dsrepo;
-  private static final Logger logger = Logger.getLogger(DockerShareRestController.class);
 
   @Autowired private JwtTokenUtil jwtTokenUtil;
 
@@ -146,8 +145,6 @@ public class DockerShareRestController {
     HttpHeaders headers = new HttpHeaders();
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
-    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
-    User user = this.urepo.findByUsername(username);
     DockerShare dockerShare = this.dsrepo.findByDockerIdAndUserId(id, unshareRequest.getUserId());
     if (dockerShare != null) {
       this.dsrepo.delete(dockerShare);
