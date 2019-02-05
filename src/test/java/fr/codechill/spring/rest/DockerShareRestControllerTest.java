@@ -1,5 +1,6 @@
 package fr.codechill.spring.rest;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -8,7 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +78,16 @@ public class DockerShareRestControllerTest {
     for (JsonNode docker : dockers) {
       dockerHelper.removeDocker(token, docker.get("id").asLong());
     }
+    UnshareRequest unshareRequest = new UnshareRequest(4L);
+    this.mock
+        .perform(
+            delete("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(unshareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
   }
 
   @Test
@@ -142,5 +155,93 @@ public class DockerShareRestControllerTest {
                 .content(JsonHelper.asJsonString(shareRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void checkAccessSuccess() throws Exception {
+    ShareRequest shareRequest = new ShareRequest();
+    shareRequest.setReadOnly(true);
+    shareRequest.setUserId(4L);
+    this.mock
+        .perform(
+            post("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(shareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+    this.mock
+        .perform(
+            get("/user/env/1/check").header("Authorization", String.format("Bearer %s", token)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void checkAccessExpired() throws Exception {
+    Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+    c.setTimeInMillis(1328435650000L);
+    Date date = c.getTime();
+    ShareRequest shareRequest = new ShareRequest();
+    shareRequest.setReadOnly(true);
+    shareRequest.setUserId(4L);
+    shareRequest.setExpirationDate(date);
+    this.mock
+        .perform(
+            post("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(shareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+    this.mock
+        .perform(
+            get("/user/env/1/check").header("Authorization", String.format("Bearer %s", token)))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void checkAccessFailed() throws Exception {
+    this.mock
+        .perform(
+            get("/user/env/1/check").header("Authorization", String.format("Bearer %s", token)))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void unshareEnvNoUser() throws Exception {
+    UnshareRequest unshareRequest = new UnshareRequest(4L);
+    this.mock
+        .perform(
+            delete("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(unshareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  public void unshareEnv() throws Exception {
+    ShareRequest shareRequest = new ShareRequest();
+    shareRequest.setReadOnly(true);
+    shareRequest.setUserId(4L);
+    this.mock
+        .perform(
+            post("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(shareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+    UnshareRequest unshareRequest = new UnshareRequest(4L);
+    this.mock
+        .perform(
+            delete("/user/env/1/share")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(unshareRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 }
