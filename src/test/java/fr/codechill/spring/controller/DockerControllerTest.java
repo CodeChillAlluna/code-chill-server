@@ -23,7 +23,7 @@ public class DockerControllerTest {
   private static Image image = new Image("codechillaluna/code-chill-ide", "latest", false);
 
   @Test
-  public void CreateDockerTest() {
+  public void createDockerTest() {
     Docker docker = this.dockerController.createDocker(nomDocker, image);
     assertNotNull(docker);
     String dockerId = docker.getContainerId();
@@ -33,7 +33,7 @@ public class DockerControllerTest {
   }
 
   @Test
-  public void DockerActionTest() {
+  public void dockerActionTest() {
     Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     String action = DockerActions.START.toString();
@@ -46,7 +46,7 @@ public class DockerControllerTest {
   }
 
   @Test
-  public void DockerStatsTest() {
+  public void dockerStatsTest() {
     Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     String action = DockerActions.START.toString();
@@ -58,7 +58,7 @@ public class DockerControllerTest {
   }
 
   @Test
-  public void DockerInspectNoInfoTest() throws Exception {
+  public void dockerInspectNoInfoTest() throws Exception {
     Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     try {
@@ -72,7 +72,7 @@ public class DockerControllerTest {
   }
 
   @Test
-  public void DeleteDockerTest() {
+  public void deleteDockerTest() {
     Docker docker = this.dockerController.createDocker(nomDocker, image);
     String dockerId = docker.getContainerId();
     String action = DockerActions.START.toString();

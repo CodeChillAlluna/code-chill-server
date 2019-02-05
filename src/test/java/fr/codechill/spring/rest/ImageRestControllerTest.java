@@ -1,6 +1,7 @@
 package fr.codechill.spring.rest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -99,5 +101,27 @@ public class ImageRestControllerTest {
             put("/images/1/privacy/true")
                 .header("Authorization", String.format("Bearer %s", token)))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void updatePrivacy() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    CommitImageRequest commitImageRequest = new CommitImageRequest("test", "1", true);
+    String res =
+        this.mock
+            .perform(
+                post(String.format("/containers/%s/commit", idDocker))
+                    .header("Authorization", "Bearer " + token)
+                    .content(JsonHelper.asJsonString(commitImageRequest))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    System.out.println(res);
+    this.mock
+        .perform(
+            put("/images/2/privacy/true")
+                .header("Authorization", String.format("Bearer %s", token)))
+        .andExpect(status().isOk());
   }
 }

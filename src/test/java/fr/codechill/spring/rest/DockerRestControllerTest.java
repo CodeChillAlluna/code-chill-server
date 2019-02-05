@@ -252,7 +252,6 @@ public class DockerRestControllerTest {
 
   @Test
   public void testRenameDockerOtherUser() throws Exception {
-    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
     this.mock
         .perform(
             post("/containers/" + 500 + "/rename/toto")

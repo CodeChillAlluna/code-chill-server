@@ -9,7 +9,6 @@ import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImageRestController {
   private final UserRepository urepo;
   private final ImageRepository irepo;
-  private static final Logger logger = Logger.getLogger(ImageRestController.class);
 
   @Autowired private JwtTokenUtil jwtTokenUtil;
 
