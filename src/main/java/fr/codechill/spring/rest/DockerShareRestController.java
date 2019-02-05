@@ -10,6 +10,7 @@ import fr.codechill.spring.repository.DockerShareRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -56,11 +57,14 @@ public class DockerShareRestController {
             .map(dockerShare -> dockerShare.getDockerId())
             .collect(Collectors.toList());
     List<Docker> dockers = this.drepo.findByIdIn(dockerIds);
-    HttpHeaders headers = new HttpHeaders();
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
+    dockersShare.sort(Comparator.comparing(DockerShare::getDockerId));
+    dockers.sort(Comparator.comparing(Docker::getId));
+    body.putPOJO("share_infos", dockersShare);
     body.putPOJO("dockers", dockers);
     body.put("message", "Successfully getting all your dockers");
+    HttpHeaders headers = new HttpHeaders();
     return ResponseEntity.ok().headers(headers).body(body);
   }
 
@@ -76,11 +80,14 @@ public class DockerShareRestController {
             .map(dockerShare -> dockerShare.getUserId())
             .collect(Collectors.toList());
     List<User> users = this.urepo.findByIdIn(userIds);
-    HttpHeaders headers = new HttpHeaders();
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
+    dockersShare.sort(Comparator.comparing(DockerShare::getUserId));
+    users.sort(Comparator.comparing(User::getId));
+    body.putPOJO("share_infos", dockersShare);
     body.putPOJO("users", users);
     body.put("message", "Successfully getting all users with access to your environment");
+    HttpHeaders headers = new HttpHeaders();
     return ResponseEntity.ok().headers(headers).body(body);
   }
 
@@ -95,7 +102,6 @@ public class DockerShareRestController {
     Date currentDate = c.getTime();
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
-    body.put("message", "Successfully getting all your images");
     if (dockerShare == null) {
       body.put("message", "You don't have access to this environment");
       return ResponseEntity.status(HttpStatus.FORBIDDEN).headers(headers).body(body);
@@ -106,6 +112,7 @@ public class DockerShareRestController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).headers(headers).body(body);
     }
     body.put("message", "You have access to this environment");
+    body.putPOJO("share_infos", dockerShare);
     return ResponseEntity.ok().headers(headers).body(body);
   }
 
