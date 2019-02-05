@@ -283,7 +283,7 @@ public class UserControllerTest {
 
   @Test
   public void testDelete() throws Exception {
-    JsonNode user = userHelper.createUser(testUser);
+    userHelper.createUser(testUser);
     String token = userHelper.authUser(username, password);
     this.mock
         .perform(delete("/user").header("Authorization", String.format("Bearer %s", token)))

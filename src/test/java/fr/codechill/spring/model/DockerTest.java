@@ -12,20 +12,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class DockerTest {
 
-  private Long id;
   private User userDummy1;
   private String name;
   private String containerId;
-  private Language language;
   private List<User> users = new ArrayList<>();
   private List<Language> languages = new ArrayList<>();
 
   @Before
   public void setUp() {
-    this.id = 12345L;
+    Long id = 12345L;
     this.name = "testDocker";
     this.containerId = "containerId";
-    this.language = new Language("Java");
+    Language language;
+    language = new Language("Java");
     this.languages.add(language);
     this.users.add(userDummy1);
   }
