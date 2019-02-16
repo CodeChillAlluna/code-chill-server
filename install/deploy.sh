@@ -5,7 +5,7 @@ docker_build=$docker_path/codechill-server.jar
 
 build_app () {
     # Build the app
-    mvn clean package -DforkCount=0
+    mvn clean package -DskipTests=true
 }
 
 build_dockerfile() {
