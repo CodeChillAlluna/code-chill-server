@@ -19,7 +19,7 @@ This repository contains the server part of the project, if you want to check th
 
 ## Summary
 
-- [Installation for contributing to this project](#development-environment))
+- [Installation for contributing to this project](#development-environment)
 - [Installation of the application](#installation)
 
 
