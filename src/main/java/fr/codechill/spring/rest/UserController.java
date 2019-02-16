@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.codechill.spring.controller.DockerController;
 import fr.codechill.spring.exception.BadRequestException;
 import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.Image;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import fr.codechill.spring.model.security.AuthorityName;
 import fr.codechill.spring.repository.AuthorityRepository;
+import fr.codechill.spring.repository.DockerShareRepository;
+import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
 import fr.codechill.spring.security.JwtUser;
@@ -20,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +48,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 public class UserController {
   private final UserRepository urepo;
-
+  private final ImageRepository irepo;
   private final AuthorityRepository arepo;
+  private final DockerShareRepository dsrepo;
 
   @Value("${spring.mail.username}")
   private String SENDFROM;
@@ -63,9 +68,34 @@ public class UserController {
   @Autowired private JwtTokenUtil jwtTokenUtil;
 
   @Autowired
-  public UserController(UserRepository urepo, AuthorityRepository arepo) {
+  public UserController(
+      UserRepository urepo,
+      AuthorityRepository arepo,
+      ImageRepository irepo,
+      DockerShareRepository dsrepo) {
     this.urepo = urepo;
     this.arepo = arepo;
+    this.irepo = irepo;
+    this.dsrepo = dsrepo;
+  }
+
+  @GetMapping("/user/all")
+  public ResponseEntity<?> getAllUsers(@RequestHeader(value = "Authorization") String token) {
+    ObjectMapper mapper = new ObjectMapper();
+    HttpHeaders headers = new HttpHeaders();
+    ObjectNode body = mapper.createObjectNode();
+    String username = jwtTokenUtil.getUsernameFromToken(token.substring(7));
+    User user = this.urepo.findByUsername(username);
+    List<User> users = this.urepo.findByEnabled(true);
+    List<JwtUser> jwtUsers =
+        users
+            .stream()
+            .filter(u -> !user.equals(u))
+            .map(u -> JwtUserFactory.create(u))
+            .collect(Collectors.toList());
+    body.putPOJO("users", jwtUsers);
+    body.put("message", "Successfully geting user info");
+    return ResponseEntity.ok().headers(headers).body(body);
   }
 
   @GetMapping("/user/{id}")
@@ -98,6 +128,7 @@ public class UserController {
               docker -> {
                 this.dcontroller.deleteDocker(docker.getContainerId());
               });
+      this.dsrepo.deleteByUserId(user.getId());
       this.urepo.delete(user);
       body.put("message ", " the user " + user.getLastname() + " has been deleted");
       logger.info(body.toString());
@@ -168,7 +199,8 @@ public class UserController {
       return ResponseEntity.badRequest().headers(responseHeaders).body(form);
     }
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-    Docker docker = this.dcontroller.createDocker("env_" + user.getUsername());
+    Image image = this.irepo.findByName("codechillaluna/code-chill-ide");
+    Docker docker = this.dcontroller.createDocker("env_" + user.getUsername(), image);
     user.addDocker(docker);
     Authority authority = arepo.findByName(AuthorityName.ROLE_USER);
     List<Authority> authorities = new ArrayList<Authority>(1);

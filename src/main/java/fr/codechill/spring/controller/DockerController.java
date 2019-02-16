@@ -5,24 +5,34 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.codechill.spring.model.Docker;
+import fr.codechill.spring.model.Image;
+import fr.codechill.spring.model.User;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.repository.ImageRepository;
+import fr.codechill.spring.rest.CommitImageRequest;
 import fr.codechill.spring.utils.docker.DockerStats;
 import fr.codechill.spring.utils.rest.CustomRestTemplate;
+import fr.codechill.spring.utils.rest.HttpClientHelper;
+import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SocketUtils;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Component
 public class DockerController {
 
   private final DockerRepository drepo;
+
+  private final ImageRepository irepo;
 
   @Autowired private CustomRestTemplate customRestTemplate;
 
@@ -35,17 +45,21 @@ public class DockerController {
   @Value("${app.maxPort}")
   private int maxPort;
 
+  private HttpClientHelper httpClient;
+
   private static final Logger logger = Logger.getLogger(DockerController.class);
 
-  public DockerController(DockerRepository drepo) {
+  public DockerController(DockerRepository drepo, ImageRepository irepo) {
     this.drepo = drepo;
+    this.irepo = irepo;
+    this.httpClient = new HttpClientHelper();
   }
 
-  public Docker createDocker(String name) {
+  public Docker createDocker(String name, Image image) {
     String dockerCreatetUrl = BASE_URL + "/containers/create?name=" + name;
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode body = mapper.createObjectNode();
-    body.put("Image", "codechillaluna/code-chill-ide");
+    body.put("Image", image.getName() + ":" + image.getVersion());
     body.put("Hostname", "chill");
     body.put("tty", true);
     body.put("OpenStdin", true);
@@ -77,10 +91,11 @@ public class DockerController {
     try {
       JsonNode id = mapper.readValue(res.getBody(), JsonNode.class);
       logger.info("id content : " + id.toString());
-      docker = new Docker(name, id.get("Id").textValue(), port);
+      docker = new Docker(name, id.get("Id").asText(), port, image);
       this.drepo.save(docker);
       logger.info("name of the saved docker : " + docker.getName());
     } catch (Exception e) {
+      e.printStackTrace();
       docker = null;
     }
     return docker;
@@ -162,6 +177,105 @@ public class DockerController {
     HttpEntity<String> entity = new HttpEntity<String>(headers);
     ResponseEntity<String> res =
         this.customRestTemplate.exchange(dockerRenameUrl, HttpMethod.POST, entity, String.class);
+    return res;
+  }
+
+  public ResponseEntity<StreamingResponseBody> exportContainer(
+      String containerId, String containerName) throws Exception {
+    String exportContainerUrl = String.format("%s/containers/%s/export", BASE_URL, containerId);
+
+    HttpResponse response = this.httpClient.get(exportContainerUrl, null);
+    StreamingResponseBody streamingResponseBody =
+        this.httpClient.contentToStreamingResponse(response.getEntity().getContent());
+
+    int status = response.getStatusLine().getStatusCode();
+    if (status != 200) {
+      return new ResponseEntity<StreamingResponseBody>(
+          streamingResponseBody, HttpStatus.valueOf(status));
+    }
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/octet-stream");
+    headers.add(
+        "Content-Disposition",
+        String.format("attachment; filename=\"%s.tar\"", containerName.replace("/", "")));
+    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+    return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
+  }
+
+  public ResponseEntity<StreamingResponseBody> exportImage(String imageName) throws Exception {
+    String exportImageUrl = String.format("%s/images/%s/get", BASE_URL, imageName);
+
+    HttpResponse response = this.httpClient.get(exportImageUrl, null);
+    StreamingResponseBody streamingResponseBody =
+        this.httpClient.contentToStreamingResponse(response.getEntity().getContent());
+
+    int status = response.getStatusLine().getStatusCode();
+    if (status != 200) {
+      return new ResponseEntity<StreamingResponseBody>(
+          streamingResponseBody, HttpStatus.valueOf(status));
+    }
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/octet-stream");
+    headers.add("Content-Disposition", String.format("attachment; filename=\"%s.tar\"", imageName));
+    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+    return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
+  }
+
+  public ResponseEntity<StreamingResponseBody> exportFile(String path, String containerId)
+      throws Exception {
+    String exportFileUrl =
+        String.format("%s/containers/%s/archive?path=%s", BASE_URL, containerId, path);
+    HttpResponse response = this.httpClient.get(exportFileUrl, null);
+    StreamingResponseBody streamingResponseBody =
+        this.httpClient.contentToStreamingResponse(response.getEntity().getContent());
+
+    int status = response.getStatusLine().getStatusCode();
+    if (status != 200) {
+      return new ResponseEntity<StreamingResponseBody>(
+          streamingResponseBody, HttpStatus.valueOf(status));
+    }
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/octet-stream");
+    headers.add("Content-Disposition", String.format("attachment; filename=\"%s.tar\"", path));
+    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+    return ResponseEntity.ok().headers(headers).body(streamingResponseBody);
+  }
+
+  public ResponseEntity<?> sendCommit(
+      Docker docker, CommitImageRequest commitImageRequest, User user) throws Exception {
+    String commitChangeUrl =
+        BASE_URL
+            + "/commit?container="
+            + docker.getContainerId()
+            + "&repo="
+            + commitImageRequest.getName()
+            + "&tag="
+            + commitImageRequest.getVersion();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> entity = new HttpEntity<String>(headers);
+    ResponseEntity<String> res =
+        this.customRestTemplate.exchange(commitChangeUrl, HttpMethod.POST, entity, String.class);
+    System.out.println(res);
+    if (res.getStatusCodeValue() == 201) {
+      logger.info(
+          "Commiting changes to the docker having for container ID : " + docker.getContainerId());
+      Image image;
+      image =
+          this.irepo.findByNameAndVersion(
+              commitImageRequest.getName(), commitImageRequest.getVersion());
+      if (image == null) {
+        image =
+            new Image(
+                commitImageRequest.getName(),
+                commitImageRequest.getVersion(),
+                commitImageRequest.getPrivacy(),
+                user);
+        this.irepo.save(image);
+        docker.setImage(image);
+        this.drepo.save(docker);
+      }
+    }
     return res;
   }
 }

@@ -37,7 +37,7 @@ public class DockerRestControllerTest {
   private static UserHelper userHelper;
   private static DockerHelper dockerHelper;
   private static User testUser;
-  private String username = "DockerUserTest";
+  private String username = "DockerUserTestWork";
   private String password = "123456789";
   private String firstname = "Docker";
   private String lastname = "User";
@@ -66,7 +66,7 @@ public class DockerRestControllerTest {
       userJson = userHelper.createUser(testUser);
       token = userHelper.authUser(this.username, this.password);
     }
-    dockerHelper.createDocker(token, "env_DockerUserTest");
+    dockerHelper.createDocker(token, "env_DockerUserTestWork", 1L);
     userJson = userHelper.userInfos(token);
   }
 
@@ -80,7 +80,8 @@ public class DockerRestControllerTest {
 
   @Test
   public void createDockerTest() throws Exception {
-    CreateDockerRequest createDockerRequest = new CreateDockerRequest("DockerRestControllerTest");
+    CreateDockerRequest createDockerRequest =
+        new CreateDockerRequest("DockerRestControllerTest", 1L);
     this.mock
         .perform(
             post("/containers/create")
@@ -88,6 +89,19 @@ public class DockerRestControllerTest {
                 .content(JsonHelper.asJsonString(createDockerRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void createDockerTestInvalidImage() throws Exception {
+    CreateDockerRequest createDockerRequest =
+        new CreateDockerRequest("DockerRestControllerTest", 100L);
+    this.mock
+        .perform(
+            post("/containers/create")
+                .header("Authorization", String.format("Bearer %s", token))
+                .content(JsonHelper.asJsonString(createDockerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -238,7 +252,6 @@ public class DockerRestControllerTest {
 
   @Test
   public void testRenameDockerOtherUser() throws Exception {
-    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
     this.mock
         .perform(
             post("/containers/" + 500 + "/rename/toto")
@@ -254,6 +267,94 @@ public class DockerRestControllerTest {
         .perform(
             post("/containers/" + idDocker + "/rename/******<<>>>")
                 .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void testExportDocker() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    this.mock
+        .perform(
+            get(String.format("/containers/%d/export/", idDocker))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testExportDockerInvalidId() throws Exception {
+    this.mock
+        .perform(
+            get("/containers/500/export/")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void testExportImage() throws Exception {
+    this.mock
+        .perform(
+            get("/images/codechillaluna/code-chill-ide/get/")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testExportImageInvalidId() throws Exception {
+    this.mock
+        .perform(
+            get("/images/500/get/")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void testExportFile() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    this.mock
+        .perform(
+            get(String.format("/containers/%d/archive/home/code/lib/index.html", idDocker))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testExportFileInvalid() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    this.mock
+        .perform(
+            get(String.format("/containers/%d/archive/home/code/libb/index.html", idDocker))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  public void testCommitChange() throws Exception {
+    Long idDocker = userJson.get("dockers").get(0).get("id").asLong();
+    CommitImageRequest commitImageRequest = new CommitImageRequest("test", "1", true);
+    this.mock
+        .perform(
+            post(String.format("/containers/%s/commit", idDocker))
+                .header("Authorization", "Bearer " + token)
+                .content(JsonHelper.asJsonString(commitImageRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  public void testCommitInvalidChange() throws Exception {
+    CommitImageRequest commitImageRequest = new CommitImageRequest("test2", "1", true);
+    this.mock
+        .perform(
+            post(String.format("/containers/500/commit"))
+                .header("Authorization", "Bearer " + token)
+                .content(JsonHelper.asJsonString(commitImageRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is4xxClientError());
   }
