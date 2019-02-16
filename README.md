@@ -121,6 +121,12 @@ Remember to format your code before commit, otherwise your build will fail.
 
 
 
+#### API Documentation
+
+If you want to see the doc for this API, go to http://localhost:8080/swagger-ui.html
+
+
+
 ## Installation 
 
 The procedure to install Code&Chill is accessible in our main [repository](https://github.com/CodeChillAlluna/code-chill#installation).
