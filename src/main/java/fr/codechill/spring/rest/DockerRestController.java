@@ -8,6 +8,7 @@ import fr.codechill.spring.model.Docker;
 import fr.codechill.spring.model.Image;
 import fr.codechill.spring.model.User;
 import fr.codechill.spring.repository.DockerRepository;
+import fr.codechill.spring.repository.DockerShareRepository;
 import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
@@ -36,6 +37,7 @@ public class DockerRestController {
   private final UserRepository urepo;
   private final DockerRepository drepo;
   private final ImageRepository irepo;
+  private final DockerShareRepository dsrepo;
   private static final Logger logger = Logger.getLogger(DockerController.class);
 
   @Autowired private JwtTokenUtil jwtTokenUtil;
@@ -43,10 +45,15 @@ public class DockerRestController {
   @Autowired private DockerController dcontroller;
 
   @Autowired
-  public DockerRestController(UserRepository urepo, DockerRepository drepo, ImageRepository irepo) {
+  public DockerRestController(
+      UserRepository urepo,
+      DockerRepository drepo,
+      ImageRepository irepo,
+      DockerShareRepository dsrepo) {
     this.urepo = urepo;
     this.drepo = drepo;
     this.irepo = irepo;
+    this.dsrepo = dsrepo;
   }
 
   private void checkUserOwnContainer(User user, Docker docker) throws BadRequestException {
@@ -130,6 +137,7 @@ public class DockerRestController {
     }
     ResponseEntity<?> res = dcontroller.deleteDocker(docker.getContainerId());
     if (res.getStatusCode().is2xxSuccessful()) {
+      this.dsrepo.deleteByUserId(docker.getId());
       user.deleteDocker(docker);
       this.urepo.save(user);
     }

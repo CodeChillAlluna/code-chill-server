@@ -14,6 +14,10 @@ public interface DockerShareRepository extends JpaRepository<DockerShare, Long> 
 
   void delete(DockerShare dockerShare);
 
+  void deleteByUserId(Long userId);
+
+  void deleteByDockerId(Long dockerId);
+
   List<DockerShare> findByDockerId(Long dockerId);
 
   List<DockerShare> findByUserId(Long userId);

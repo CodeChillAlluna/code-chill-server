@@ -10,6 +10,7 @@ import fr.codechill.spring.model.User;
 import fr.codechill.spring.model.security.Authority;
 import fr.codechill.spring.model.security.AuthorityName;
 import fr.codechill.spring.repository.AuthorityRepository;
+import fr.codechill.spring.repository.DockerShareRepository;
 import fr.codechill.spring.repository.ImageRepository;
 import fr.codechill.spring.repository.UserRepository;
 import fr.codechill.spring.security.JwtTokenUtil;
@@ -49,6 +50,7 @@ public class UserController {
   private final UserRepository urepo;
   private final ImageRepository irepo;
   private final AuthorityRepository arepo;
+  private final DockerShareRepository dsrepo;
 
   @Value("${spring.mail.username}")
   private String SENDFROM;
@@ -66,10 +68,15 @@ public class UserController {
   @Autowired private JwtTokenUtil jwtTokenUtil;
 
   @Autowired
-  public UserController(UserRepository urepo, AuthorityRepository arepo, ImageRepository irepo) {
+  public UserController(
+      UserRepository urepo,
+      AuthorityRepository arepo,
+      ImageRepository irepo,
+      DockerShareRepository dsrepo) {
     this.urepo = urepo;
     this.arepo = arepo;
     this.irepo = irepo;
+    this.dsrepo = dsrepo;
   }
 
   @GetMapping("/user/all")
@@ -121,6 +128,7 @@ public class UserController {
               docker -> {
                 this.dcontroller.deleteDocker(docker.getContainerId());
               });
+      this.dsrepo.deleteByUserId(user.getId());
       this.urepo.delete(user);
       body.put("message ", " the user " + user.getLastname() + " has been deleted");
       logger.info(body.toString());
